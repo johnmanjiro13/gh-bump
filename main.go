@@ -1,50 +1,70 @@
 package main
 
 import (
+	"bytes"
 	"fmt"
 	"os"
 	"os/exec"
-	"sort"
+	"strings"
 
 	"github.com/Masterminds/semver/v3"
 	"github.com/cli/safeexec"
-	"github.com/go-git/go-git/v5"
-	"github.com/go-git/go-git/v5/plumbing"
 	"github.com/manifoldco/promptui"
 	"github.com/spf13/cobra"
 )
 
 func newCmd() *cobra.Command {
+	var repository string
 	cmd := &cobra.Command{
 		Use:   "bump",
 		Short: "bump version of a given repository",
 		RunE: func(cmd *cobra.Command, args []string) error {
-			r, err := git.PlainOpen(".")
-			if err != nil {
-				return err
-			}
 			b := &bumper{
-				repo: r,
-				cmd:  cmd,
+				repository: repository,
+				cmd:        cmd,
+			}
+			if repository == "" {
+				repo, err := resolveRepository()
+				if err != nil {
+					return err
+				}
+				b.repository = repo
 			}
 			return b.bump()
 		},
 	}
+
+	cmd.Flags().StringVarP(&repository, "repo", "R", "", "Select another repository using the [HOST/]OWNER/REPO format")
+
 	return cmd
 }
 
+func resolveRepository() (string, error) {
+	sout, _, err := gh("repo", "view")
+	if err != nil {
+		return "", err
+	}
+	viewOut := strings.Split(sout.String(), "\n")[0]
+	repo := strings.TrimSpace(strings.Split(viewOut, ":")[1])
+	return repo, nil
+}
+
 type bumper struct {
-	repo           *git.Repository
+	repository     string
 	cmd            *cobra.Command
 	initialVersion bool
 }
 
 func (b *bumper) bump() error {
+	b.listReleases()
 	current, err := b.currentVersion()
 	if err != nil {
 		return err
 	}
 	nextVer, err := b.nextVersion(current)
+	if err != nil {
+		return err
+	}
 	ok, err := b.approveBump(nextVer)
 	if err != nil {
 		return err
@@ -53,10 +73,12 @@ func (b *bumper) bump() error {
 		b.cmd.Println("Bump was canceled.")
 		return nil
 	}
-	if err := gh("release", "create", nextVer.Original()); err != nil {
+	sout, _, err := gh("release", "create", nextVer.Original(), "-R", b.repository)
+	if err != nil {
 		return err
 	}
 	b.cmd.Println("Release created.")
+	b.cmd.Println(sout.String())
 	return nil
 }
 
@@ -72,55 +94,35 @@ func run() int {
 	return 0
 }
 
-func (b *bumper) currentVersion() (*semver.Version, error) {
-	tagrefs, err := b.repo.Tags()
+func (b *bumper) listReleases() error {
+	sout, _, err := gh("release", "list", "-R", b.repository)
 	if err != nil {
-		return nil, fmt.Errorf("failed to get tags. err: %w", err)
+		return err
 	}
+	b.cmd.Println("Tags:")
+	b.cmd.Println(sout.String())
+	return nil
+}
 
-	var tags []string
-	err = tagrefs.ForEach(func(t *plumbing.Reference) error {
-		tag := t.Name()
-		if tag.IsTag() {
-			tags = append(tags, tag.Short())
-		}
-		return nil
-	})
+func (b *bumper) currentVersion() (*semver.Version, error) {
+	sout, eout, err := gh("release", "view", "-R", b.repository)
 	if err != nil {
+		if strings.Contains(eout.String(), "HTTP 404: Not Found") {
+			current, err := newVersion()
+			if err != nil {
+				return nil, err
+			}
+			b.initialVersion = true
+			return current, nil
+		}
 		return nil, err
 	}
-
-	var current *semver.Version
-	if len(tags) == 0 {
-		current, err = newVersion()
-		if err != nil {
-			return nil, err
-		}
-		b.initialVersion = true
-		return current, nil
+	viewOut := strings.Split(sout.String(), "\n")[1]
+	v := strings.TrimSpace(strings.Split(viewOut, ":")[1])
+	current, err := semver.NewVersion(v)
+	if err != nil {
+		return nil, fmt.Errorf("invalid version. err: %w", err)
 	}
-
-	versions := []*semver.Version{}
-	for _, tag := range tags {
-		v, err := semver.NewVersion(tag)
-		if err != nil {
-			continue
-		}
-		versions = append(versions, v)
-	}
-	sort.Sort(semver.Collection(versions))
-
-	last := len(tags) - 1
-	current = versions[last]
-	b.cmd.Println("Tags:")
-	for i, v := range versions {
-		msg := fmt.Sprintf("- %s", v.Original())
-		if i == last {
-			msg = fmt.Sprintf("- %s (current)", v.Original())
-		}
-		b.cmd.Println(msg)
-	}
-
 	return current, nil
 }
 
@@ -149,7 +151,7 @@ func (b *bumper) nextVersion(current *semver.Version) (*semver.Version, error) {
 		return current, nil
 	}
 	prompr := promptui.Select{
-		Label: "Select next version",
+		Label: fmt.Sprintf("Select next version. current: %s", current.Original()),
 		Items: []string{"Major", "Minor", "Patch"},
 	}
 	_, bumpType, err := prompr.Run()
@@ -173,7 +175,7 @@ func (b *bumper) nextVersion(current *semver.Version) (*semver.Version, error) {
 
 func (b *bumper) approveBump(next *semver.Version) (bool, error) {
 	prompt := promptui.Prompt{
-		Label:    fmt.Sprintf("Create release %s? [y/n]", next.Original()),
+		Label:    fmt.Sprintf("Create release %s ? [y/n]", next.Original()),
 		Validate: func(input string) error { return nil },
 	}
 	result, err := prompt.Run()
@@ -186,15 +188,21 @@ func (b *bumper) approveBump(next *semver.Version) (bool, error) {
 	return false, nil
 }
 
-func gh(args ...string) error {
+func gh(args ...string) (sout, eout bytes.Buffer, err error) {
 	ghBin, err := safeexec.LookPath("gh")
 	if err != nil {
-		return fmt.Errorf("could not find gh. err: %w", err)
+		err = fmt.Errorf("could not find gh. err: %w", err)
+		return
 	}
 
 	cmd := exec.Command(ghBin, args...)
-	if err := cmd.Run(); err != nil {
-		return fmt.Errorf("failed to run gh. err: %w", err)
+	cmd.Stdout = &sout
+	cmd.Stderr = &eout
+
+	err = cmd.Run()
+	if err != nil {
+		err = fmt.Errorf("failed to run gh. err: %w, eout: %s", err, eout.String())
+		return
 	}
-	return nil
+	return
 }
