@@ -1,0 +1,58 @@
+#!/bin/bash
+set -e
+
+repo="johnmanjiro13/gh-bump"
+tag="v0.0.1"
+
+extensionPath="$(dirname "$0")"
+arch="$(uname -m)"
+
+exe=""
+
+if uname -a | grep Msys > /dev/null; then
+  if [ $arch = "x86_64" ]; then
+    exe="gh-bump_Windows_x86_64_${tag}.exe"
+  elif [ $arch = "i686" ]; then
+    exe="gh-bump_Windows_i386_${tag}.exe"
+  elif [ $arch = "i386" ]; then
+    exe="gh-bump_Windows_i386_${tag}.exe"
+  fi
+elif uname -a | grep Darwin > /dev/null; then
+  if [ $arch = "x86_64" ]; then
+    exe="gh-bump_Darwin_x86_64_${tag}"
+  elif [ $arch = "arm64" ]; then
+    exe="gh-bump_Darwin_arm64_${tag}"
+  fi
+elif uname -a | grep Linux > /dev/null; then
+  if [ $arch = "x86_64" ]; then
+    exe="gh-bump_Linux_x86_64_${tag}"
+  elif [ $arch = "i686" ]; then
+    exe="gh-bump_Linux_i386_${tag}"
+  elif [ $arch = "i386" ]; then
+    exe="gh-bump_Linux_i386_${tag}"
+  elif [ $arch = "arm64" ]; then
+    exe=gh-bump_Linux_arm64_${tag}
+  fi
+fi
+
+if [ "${exe}" == "" ]; then
+  if [ "$(which go)" = "" ]; then
+    echo "go must be installed to use this gh extension on this platform"
+    exit 1
+  fi
+
+  exe="cmd.out"
+
+  cd "${extensionPath}" > /dev/null
+  go build -o "${exe}"
+  cd - > /dev/null
+else
+  if [[ ! -x "${extensionPath}/bin/${exe}" ]]; then
+    mkdir -p bin
+    rm -f "${extensionPath}/bin/*"
+    gh release -R"${repo}" download "${tag}" -p "${exe}" --dir="${extensionPath}/bin"
+    chmod +x "${extensionPath}/bin/${exe}"
+  fi
+fi
+
+exec "${extensionPath}/bin/${exe}" "$@"
