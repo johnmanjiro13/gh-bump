@@ -77,7 +77,7 @@ func (b *bumper) bump() error {
 	if err != nil {
 		return err
 	}
-	b.cmd.Println("Release created.")
+	b.cmd.Println("Release was created.")
 	b.cmd.Println(sout.String())
 	return nil
 }
@@ -118,8 +118,8 @@ func (b *bumper) currentVersion() (*semver.Version, error) {
 		return nil, err
 	}
 	viewOut := strings.Split(sout.String(), "\n")[1]
-	v := strings.TrimSpace(strings.Split(viewOut, ":")[1])
-	current, err := semver.NewVersion(v)
+	tag := strings.TrimSpace(strings.Split(viewOut, ":")[1])
+	current, err := semver.NewVersion(tag)
 	if err != nil {
 		return nil, fmt.Errorf("invalid version. err: %w", err)
 	}
@@ -152,7 +152,7 @@ func (b *bumper) nextVersion(current *semver.Version) (*semver.Version, error) {
 	}
 	prompr := promptui.Select{
 		Label: fmt.Sprintf("Select next version. current: %s", current.Original()),
-		Items: []string{"Major", "Minor", "Patch"},
+		Items: []string{"patch", "minor", "major"},
 	}
 	_, bumpType, err := prompr.Run()
 	if err != nil {
@@ -161,11 +161,11 @@ func (b *bumper) nextVersion(current *semver.Version) (*semver.Version, error) {
 
 	var next semver.Version
 	switch bumpType {
-	case "Major":
+	case "major":
 		next = current.IncMajor()
-	case "Minor":
+	case "minor":
 		next = current.IncMinor()
-	case "Patch":
+	case "patch":
 		next = current.IncPatch()
 	default:
 		return nil, fmt.Errorf("invalid type")
