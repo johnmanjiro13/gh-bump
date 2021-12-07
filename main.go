@@ -29,6 +29,7 @@ func newCmd() *cobra.Command {
 					return err
 				}
 				b.repository = repo
+				b.isCurrent = true
 			}
 			return b.bump()
 		},
@@ -53,6 +54,7 @@ type bumper struct {
 	repository     string
 	cmd            *cobra.Command
 	initialVersion bool
+	isCurrent      bool
 }
 
 func (b *bumper) bump() error {
@@ -73,7 +75,13 @@ func (b *bumper) bump() error {
 		b.cmd.Println("Bump was canceled.")
 		return nil
 	}
-	sout, _, err := gh("release", "create", nextVer.Original(), "-R", b.repository)
+
+	var sout bytes.Buffer
+	if b.isCurrent {
+		sout, _, err = gh("release", "create", nextVer.Original())
+	} else {
+		sout, _, err = gh("release", "create", nextVer.Original(), "-R", b.repository)
+	}
 	if err != nil {
 		return err
 	}
@@ -95,7 +103,13 @@ func run() int {
 }
 
 func (b *bumper) listReleases() error {
-	sout, _, err := gh("release", "list", "-R", b.repository)
+	var sout bytes.Buffer
+	var err error
+	if b.isCurrent {
+		sout, _, err = gh("release", "list")
+	} else {
+		sout, _, err = gh("release", "list", "-R", b.repository)
+	}
 	if err != nil {
 		return err
 	}
@@ -105,7 +119,13 @@ func (b *bumper) listReleases() error {
 }
 
 func (b *bumper) currentVersion() (*semver.Version, error) {
-	sout, eout, err := gh("release", "view", "-R", b.repository)
+	var sout, eout bytes.Buffer
+	var err error
+	if b.isCurrent {
+		sout, eout, err = gh("release", "view")
+	} else {
+		sout, eout, err = gh("release", "view", "-R", b.repository)
+	}
 	if err != nil {
 		if strings.Contains(eout.String(), "HTTP 404: Not Found") {
 			current, err := newVersion()
