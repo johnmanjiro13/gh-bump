@@ -58,7 +58,9 @@ type bumper struct {
 }
 
 func (b *bumper) bump() error {
-	b.listReleases()
+	if err := b.listReleases(); err != nil {
+		return err
+	}
 	current, err := b.currentVersion()
 	if err != nil {
 		return err
