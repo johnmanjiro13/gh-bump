@@ -20,6 +20,33 @@ func (g *gh) ViewRepository() (sout, eout bytes.Buffer, err error) {
 	return runGh("repo", "view")
 }
 
+func (g *gh) ListRelease(repo string, isCurrent bool) (sout, eout bytes.Buffer, err error) {
+	if isCurrent {
+		sout, eout, err = runGh("release", "list")
+	} else {
+		sout, eout, err = runGh("release", "list", "-R", repo)
+	}
+	return
+}
+
+func (g *gh) ViewRelease(repo string, isCurrent bool) (sout, eout bytes.Buffer, err error) {
+	if isCurrent {
+		sout, eout, err = runGh("release", "view")
+	} else {
+		sout, eout, err = runGh("release", "view", "-R", repo)
+	}
+	return
+}
+
+func (g *gh) CreateRelease(version string, repo string, isCurrent bool) (sout, eout bytes.Buffer, err error) {
+	if isCurrent {
+		sout, eout, err = runGh("release", "create", version)
+	} else {
+		sout, eout, err = runGh("release", "create", version, "-R", repo)
+	}
+	return
+}
+
 func runGh(args ...string) (sout, eout bytes.Buffer, err error) {
 	ghBin, err := safeexec.LookPath("gh")
 	if err != nil {
