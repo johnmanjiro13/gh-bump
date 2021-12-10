@@ -1,18 +1,12 @@
 package cmd
 
 import (
-	"bytes"
-
 	"github.com/spf13/cobra"
 )
 
 type Bumper interface {
 	Bump() error
 	WithRepository(repository string) error
-}
-
-type Gh interface {
-	ViewRepository() (sout, eout bytes.Buffer, err error)
 }
 
 func NewCmd(bumper Bumper) *cobra.Command {
