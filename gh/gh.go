@@ -38,12 +38,15 @@ func (g *gh) ViewRelease(repo string, isCurrent bool) (sout, eout bytes.Buffer, 
 	return
 }
 
-func (g *gh) CreateRelease(version string, repo string, isCurrent bool) (sout, eout bytes.Buffer, err error) {
-	if isCurrent {
-		sout, eout, err = runGh("release", "create", version)
-	} else {
-		sout, eout, err = runGh("release", "create", version, "-R", repo)
+func (g *gh) CreateRelease(version string, repo string, isCurrent bool, option *bump.ReleaseOption) (sout, eout bytes.Buffer, err error) {
+	args := []string{"release", "create", version}
+	if !isCurrent {
+		args = append(args, []string{"-R", repo}...)
 	}
+	if option.Title != "" {
+		args = append(args, []string{"-t", option.Title}...)
+	}
+	sout, eout, err = runGh(args...)
 	return
 }
 
