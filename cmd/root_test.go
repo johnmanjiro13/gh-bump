@@ -9,6 +9,7 @@ import (
 
 type mockBumper struct {
 	repository string
+	title      string
 }
 
 func (b *mockBumper) Bump() error {
@@ -20,10 +21,15 @@ func (b *mockBumper) WithRepository(repository string) error {
 	return nil
 }
 
+func (b *mockBumper) WithTitle(title string) {
+	b.title = title
+}
+
 func TestNewCmd(t *testing.T) {
 	tests := map[string]struct {
-		command  string
-		wantRepo string
+		command   string
+		wantRepo  string
+		wantTitle string
 	}{
 		"repository given": {
 			command:  "bump -R johnmanjiro13/gh-bump",
@@ -32,6 +38,10 @@ func TestNewCmd(t *testing.T) {
 		"current repository": {
 			command:  "bump",
 			wantRepo: "",
+		},
+		"with title": {
+			command:   "bump -t test_title",
+			wantTitle: "test_title",
 		},
 	}
 
@@ -43,6 +53,7 @@ func TestNewCmd(t *testing.T) {
 
 			assert.NoError(t, cmd.Execute())
 			assert.Equal(t, tt.wantRepo, bumper.repository)
+			assert.Equal(t, tt.wantTitle, bumper.title)
 		})
 	}
 }

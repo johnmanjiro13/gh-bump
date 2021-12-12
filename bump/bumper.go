@@ -15,13 +15,18 @@ type Gh interface {
 	ViewRepository() (sout, eout bytes.Buffer, err error)
 	ListRelease(repo string, isCurrent bool) (sout, eout bytes.Buffer, err error)
 	ViewRelease(repo string, isCurrent bool) (sout, eout bytes.Buffer, err error)
-	CreateRelease(version string, repo string, isCurrent bool) (sout, eout bytes.Buffer, err error)
+	CreateRelease(version string, repo string, isCurrent bool, option *ReleaseOption) (sout, eout bytes.Buffer, err error)
+}
+
+type ReleaseOption struct {
+	Title string
 }
 
 type bumper struct {
 	gh         Gh
 	repository string
 	isCurrent  bool
+	title      string
 }
 
 func New(gh Gh) cmd.Bumper {
@@ -80,6 +85,10 @@ func (b *bumper) WithRepository(repository string) error {
 	b.repository = repo
 	b.isCurrent = true
 	return nil
+}
+
+func (b *bumper) WithTitle(title string) {
+	b.title = title
 }
 
 func (b *bumper) resolveRepository() (string, error) {
@@ -189,7 +198,10 @@ func (b *bumper) approve(next *semver.Version) (bool, error) {
 }
 
 func (b *bumper) createRelease(version string) (string, error) {
-	sout, _, err := b.gh.CreateRelease(version, b.repository, b.isCurrent)
+	option := &ReleaseOption{
+		Title: b.title,
+	}
+	sout, _, err := b.gh.CreateRelease(version, b.repository, b.isCurrent, option)
 	if err != nil {
 		return "", err
 	}

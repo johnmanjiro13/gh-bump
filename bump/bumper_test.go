@@ -30,7 +30,7 @@ func (g *mockGh) ViewRelease(repo string, isCurrent bool) (sout, eout bytes.Buff
 	return
 }
 
-func (g *mockGh) CreateRelease(version string, repo string, isCurrent bool) (sout, eout bytes.Buffer, err error) {
+func (g *mockGh) CreateRelease(version string, repo string, isCurrent bool, option *ReleaseOption) (sout, eout bytes.Buffer, err error) {
 	sout.WriteString(version)
 	return
 }
