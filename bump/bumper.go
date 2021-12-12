@@ -23,11 +23,10 @@ type ReleaseOption struct {
 }
 
 type bumper struct {
-	gh               Gh
-	repository       string
-	isCurrent        bool
-	isInitialVersion bool
-	title            string
+	gh         Gh
+	repository string
+	isCurrent  bool
+	title      string
 }
 
 func New(gh Gh) cmd.Bumper {
@@ -41,13 +40,18 @@ func (b *bumper) Bump() error {
 	}
 	fmt.Println(releases)
 
-	current, err := b.currentVersion()
+	current, isInitial, err := b.currentVersion()
 	if err != nil {
 		return err
 	}
-	nextVer, err := b.nextVersion(current)
-	if err != nil {
-		return err
+	var nextVer *semver.Version
+	if isInitial {
+		nextVer = current
+	} else {
+		nextVer, err = b.nextVersion(current)
+		if err != nil {
+			return err
+		}
 	}
 
 	ok, err := b.approve(nextVer)
@@ -105,26 +109,27 @@ func (b *bumper) listReleases() (string, error) {
 	return fmt.Sprintf("Tags:\n%s", sout.String()), nil
 }
 
-func (b *bumper) currentVersion() (*semver.Version, error) {
+func (b *bumper) currentVersion() (*semver.Version, bool, error) {
+	var isInitial bool
 	sout, eout, err := b.gh.ViewRelease(b.repository, b.isCurrent)
 	if err != nil {
 		if strings.Contains(eout.String(), "HTTP 404: Not Found") {
 			current, err := newVersion()
 			if err != nil {
-				return nil, err
+				return nil, isInitial, err
 			}
-			b.isInitialVersion = true
-			return current, nil
+			isInitial = true
+			return current, isInitial, nil
 		}
-		return nil, err
+		return nil, isInitial, err
 	}
 	viewOut := strings.Split(sout.String(), "\n")[1]
 	tag := strings.TrimSpace(strings.Split(viewOut, ":")[1])
 	current, err := semver.NewVersion(tag)
 	if err != nil {
-		return nil, fmt.Errorf("invalid version. err: %w", err)
+		return nil, isInitial, fmt.Errorf("invalid version. err: %w", err)
 	}
-	return current, nil
+	return current, isInitial, nil
 }
 
 func newVersion() (*semver.Version, error) {
@@ -148,9 +153,6 @@ func newVersion() (*semver.Version, error) {
 }
 
 func (b *bumper) nextVersion(current *semver.Version) (*semver.Version, error) {
-	if b.isInitialVersion {
-		return current, nil
-	}
 	prompt := promptui.Select{
 		Label: fmt.Sprintf("Select next version. current: %s", current.Original()),
 		Items: []string{"patch", "minor", "major"},
