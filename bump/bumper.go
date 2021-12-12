@@ -19,22 +19,24 @@ type Gh interface {
 }
 
 type ReleaseOption struct {
-	IsDraft      bool
-	IsPrerelease bool
-	Notes        string
-	Target       string
-	Title        string
+	IsDraft       bool
+	IsPrerelease  bool
+	Notes         string
+	NotesFilename string
+	Target        string
+	Title         string
 }
 
 type bumper struct {
-	gh           Gh
-	repository   string
-	isCurrent    bool
-	isDraft      bool
-	isPrerelease bool
-	notes        string
-	target       string
-	title        string
+	gh            Gh
+	repository    string
+	isCurrent     bool
+	isDraft       bool
+	isPrerelease  bool
+	notes         string
+	notesFilename string
+	target        string
+	title         string
 }
 
 func New(gh Gh) cmd.Bumper {
@@ -66,6 +68,10 @@ func (b *bumper) WithPrerelease() {
 
 func (b *bumper) WithNotes(notes string) {
 	b.notes = notes
+}
+
+func (b *bumper) WithNotesFile(filename string) {
+	b.notesFilename = filename
 }
 
 func (b *bumper) WithTarget(target string) {
@@ -223,11 +229,12 @@ func (b *bumper) approve(next *semver.Version) (bool, error) {
 
 func (b *bumper) createRelease(version string) (string, error) {
 	option := &ReleaseOption{
-		IsDraft:      b.isDraft,
-		IsPrerelease: b.isPrerelease,
-		Notes:        b.notes,
-		Target:       b.target,
-		Title:        b.title,
+		IsDraft:       b.isDraft,
+		IsPrerelease:  b.isPrerelease,
+		Notes:         b.notes,
+		NotesFilename: b.notesFilename,
+		Target:        b.target,
+		Title:         b.title,
 	}
 	sout, _, err := b.gh.CreateRelease(version, b.repository, b.isCurrent, option)
 	if err != nil {

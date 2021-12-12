@@ -52,6 +52,9 @@ func (g *gh) CreateRelease(version string, repo string, isCurrent bool, option *
 	if option.Notes != "" {
 		args = append(args, []string{"--notes", option.Notes}...)
 	}
+	if option.NotesFilename != "" {
+		args = append(args, []string{"--notes-file", option.NotesFilename}...)
+	}
 	if option.Target != "" {
 		args = append(args, []string{"--target", option.Target}...)
 	}

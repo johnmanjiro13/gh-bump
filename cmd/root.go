@@ -8,8 +8,9 @@ type Bumper interface {
 	Bump() error
 	WithRepository(repository string) error
 	WithDraft()
-	WithNotes(notes string)
 	WithPrerelease()
+	WithNotes(notes string)
+	WithNotesFile(filename string)
 	WithTitle(title string)
 	WithTarget(target string)
 }
@@ -20,6 +21,7 @@ func New(bumper Bumper) *cobra.Command {
 		isDraft      bool
 		isPrerelease bool
 		notes        string
+		notesFile    string
 		target       string
 		title        string
 	)
@@ -39,6 +41,9 @@ func New(bumper Bumper) *cobra.Command {
 			if notes != "" {
 				bumper.WithNotes(notes)
 			}
+			if notesFile != "" {
+				bumper.WithNotesFile(notesFile)
+			}
 			if target != "" {
 				bumper.WithTarget(target)
 			}
@@ -53,6 +58,7 @@ func New(bumper Bumper) *cobra.Command {
 	cmd.Flags().BoolVarP(&isDraft, "draft", "d", false, "Save the release as a draft instead of publishing it")
 	cmd.Flags().BoolVarP(&isPrerelease, "prerelease", "p", false, "Mark the release as a prerelease")
 	cmd.Flags().StringVarP(&notes, "notes", "n", "", "Release notes")
+	cmd.Flags().StringVarP(&notesFile, "notes-file", "F", "", "Read release notes from file")
 	cmd.Flags().StringVarP(&target, "target", "", "", "Target branch or full commit SHA (default: main branch)")
 	cmd.Flags().StringVarP(&title, "title", "t", "", "Release title")
 	return cmd
