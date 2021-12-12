@@ -8,12 +8,13 @@ import (
 )
 
 type mockBumper struct {
-	repository   string
-	isDraft      bool
-	isPrerelease bool
-	notes        string
-	target       string
-	title        string
+	repository    string
+	isDraft       bool
+	isPrerelease  bool
+	notes         string
+	notesFilename string
+	target        string
+	title         string
 }
 
 func (b *mockBumper) Bump() error {
@@ -37,6 +38,10 @@ func (b *mockBumper) WithNotes(notes string) {
 	b.notes = notes
 }
 
+func (b *mockBumper) WithNotesFile(filename string) {
+	b.notesFilename = filename
+}
+
 func (b *mockBumper) WithTitle(title string) {
 	b.title = title
 }
@@ -45,15 +50,16 @@ func (b *mockBumper) WithTarget(target string) {
 	b.target = target
 }
 
-func TestNewCmd(t *testing.T) {
+func TestNew(t *testing.T) {
 	tests := map[string]struct {
-		command        string
-		wantRepo       string
-		wantDraft      bool
-		wantNotes      string
-		wantPrerelease bool
-		wantTarget     string
-		wantTitle      string
+		command           string
+		wantRepo          string
+		wantDraft         bool
+		wantNotes         string
+		wantNotesFilename string
+		wantPrerelease    bool
+		wantTarget        string
+		wantTitle         string
 	}{
 		"repository given": {
 			command:  "bump -R johnmanjiro13/gh-bump",
@@ -74,6 +80,10 @@ func TestNewCmd(t *testing.T) {
 		"with notes": {
 			command:   "bump --notes release",
 			wantNotes: "release",
+		},
+		"with notes file": {
+			command:           "bump --notes-file filename",
+			wantNotesFilename: "filename",
 		},
 		"with target": {
 			command:    "bump --target feature",
@@ -96,6 +106,7 @@ func TestNewCmd(t *testing.T) {
 			assert.Equal(t, tt.wantDraft, bumper.isDraft)
 			assert.Equal(t, tt.wantPrerelease, bumper.isPrerelease)
 			assert.Equal(t, tt.wantNotes, bumper.notes)
+			assert.Equal(t, tt.wantNotesFilename, bumper.notesFilename)
 			assert.Equal(t, tt.wantTarget, bumper.target)
 			assert.Equal(t, tt.wantTitle, bumper.title)
 		})
