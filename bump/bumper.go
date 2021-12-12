@@ -19,18 +19,43 @@ type Gh interface {
 }
 
 type ReleaseOption struct {
-	Title string
+	Target string
+	Title  string
 }
 
 type bumper struct {
 	gh         Gh
 	repository string
 	isCurrent  bool
+	target     string
 	title      string
 }
 
 func New(gh Gh) cmd.Bumper {
 	return &bumper{gh: gh}
+}
+
+func (b *bumper) WithRepository(repository string) error {
+	if repository != "" {
+		b.repository = repository
+		return nil
+	}
+
+	repo, err := b.resolveRepository()
+	if err != nil {
+		return err
+	}
+	b.repository = repo
+	b.isCurrent = true
+	return nil
+}
+
+func (b *bumper) WithTarget(target string) {
+	b.target = target
+}
+
+func (b *bumper) WithTitle(title string) {
+	b.title = title
 }
 
 func (b *bumper) Bump() error {
@@ -70,25 +95,6 @@ func (b *bumper) Bump() error {
 	fmt.Println("Release was created.")
 	fmt.Println(result)
 	return nil
-}
-
-func (b *bumper) WithRepository(repository string) error {
-	if repository != "" {
-		b.repository = repository
-		return nil
-	}
-
-	repo, err := b.resolveRepository()
-	if err != nil {
-		return err
-	}
-	b.repository = repo
-	b.isCurrent = true
-	return nil
-}
-
-func (b *bumper) WithTitle(title string) {
-	b.title = title
 }
 
 func (b *bumper) resolveRepository() (string, error) {
@@ -199,7 +205,8 @@ func (b *bumper) approve(next *semver.Version) (bool, error) {
 
 func (b *bumper) createRelease(version string) (string, error) {
 	option := &ReleaseOption{
-		Title: b.title,
+		Target: b.target,
+		Title:  b.title,
 	}
 	sout, _, err := b.gh.CreateRelease(version, b.repository, b.isCurrent, option)
 	if err != nil {
