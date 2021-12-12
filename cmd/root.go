@@ -9,6 +9,7 @@ type Bumper interface {
 	WithRepository(repository string) error
 	WithDraft()
 	WithPrerelease()
+	WithDiscussionCategory(category string)
 	WithNotes(notes string)
 	WithNotesFile(filename string)
 	WithTitle(title string)
@@ -17,13 +18,14 @@ type Bumper interface {
 
 func New(bumper Bumper) *cobra.Command {
 	var (
-		repository   string
-		isDraft      bool
-		isPrerelease bool
-		notes        string
-		notesFile    string
-		target       string
-		title        string
+		repository         string
+		isDraft            bool
+		isPrerelease       bool
+		discussionCategory string
+		notes              string
+		notesFile          string
+		target             string
+		title              string
 	)
 	cmd := &cobra.Command{
 		Use:   "bump",
@@ -37,6 +39,9 @@ func New(bumper Bumper) *cobra.Command {
 			}
 			if isPrerelease {
 				bumper.WithPrerelease()
+			}
+			if discussionCategory != "" {
+				bumper.WithDiscussionCategory(discussionCategory)
 			}
 			if notes != "" {
 				bumper.WithNotes(notes)
@@ -57,6 +62,7 @@ func New(bumper Bumper) *cobra.Command {
 	cmd.Flags().StringVarP(&repository, "repo", "R", "", "Select another repository using the [HOST/]OWNER/REPO format")
 	cmd.Flags().BoolVarP(&isDraft, "draft", "d", false, "Save the release as a draft instead of publishing it")
 	cmd.Flags().BoolVarP(&isPrerelease, "prerelease", "p", false, "Mark the release as a prerelease")
+	cmd.Flags().StringVarP(&discussionCategory, "discussion-category", "", "", "Start a discussion of the specified category")
 	cmd.Flags().StringVarP(&notes, "notes", "n", "", "Release notes")
 	cmd.Flags().StringVarP(&notesFile, "notes-file", "F", "", "Read release notes from file")
 	cmd.Flags().StringVarP(&target, "target", "", "", "Target branch or full commit SHA (default: main branch)")
