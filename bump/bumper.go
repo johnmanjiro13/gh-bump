@@ -21,6 +21,7 @@ type Gh interface {
 type ReleaseOption struct {
 	IsDraft      bool
 	IsPrerelease bool
+	Notes        string
 	Target       string
 	Title        string
 }
@@ -31,6 +32,7 @@ type bumper struct {
 	isCurrent    bool
 	isDraft      bool
 	isPrerelease bool
+	notes        string
 	target       string
 	title        string
 }
@@ -60,6 +62,10 @@ func (b *bumper) WithDraft() {
 
 func (b *bumper) WithPrerelease() {
 	b.isPrerelease = true
+}
+
+func (b *bumper) WithNotes(notes string) {
+	b.notes = notes
 }
 
 func (b *bumper) WithTarget(target string) {
@@ -219,6 +225,7 @@ func (b *bumper) createRelease(version string) (string, error) {
 	option := &ReleaseOption{
 		IsDraft:      b.isDraft,
 		IsPrerelease: b.isPrerelease,
+		Notes:        b.notes,
 		Target:       b.target,
 		Title:        b.title,
 	}

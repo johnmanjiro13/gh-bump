@@ -11,6 +11,7 @@ type mockBumper struct {
 	repository   string
 	isDraft      bool
 	isPrerelease bool
+	notes        string
 	target       string
 	title        string
 }
@@ -32,6 +33,10 @@ func (b *mockBumper) WithPrerelease() {
 	b.isPrerelease = true
 }
 
+func (b *mockBumper) WithNotes(notes string) {
+	b.notes = notes
+}
+
 func (b *mockBumper) WithTitle(title string) {
 	b.title = title
 }
@@ -45,6 +50,7 @@ func TestNewCmd(t *testing.T) {
 		command        string
 		wantRepo       string
 		wantDraft      bool
+		wantNotes      string
 		wantPrerelease bool
 		wantTarget     string
 		wantTitle      string
@@ -64,6 +70,10 @@ func TestNewCmd(t *testing.T) {
 		"with prerelease": {
 			command:        "bump --prerelease",
 			wantPrerelease: true,
+		},
+		"with notes": {
+			command:   "bump --notes release",
+			wantNotes: "release",
 		},
 		"with target": {
 			command:    "bump --target feature",
@@ -85,6 +95,7 @@ func TestNewCmd(t *testing.T) {
 			assert.Equal(t, tt.wantRepo, bumper.repository)
 			assert.Equal(t, tt.wantDraft, bumper.isDraft)
 			assert.Equal(t, tt.wantPrerelease, bumper.isPrerelease)
+			assert.Equal(t, tt.wantNotes, bumper.notes)
 			assert.Equal(t, tt.wantTarget, bumper.target)
 			assert.Equal(t, tt.wantTitle, bumper.title)
 		})
