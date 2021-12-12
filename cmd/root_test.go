@@ -8,13 +8,14 @@ import (
 )
 
 type mockBumper struct {
-	repository    string
-	isDraft       bool
-	isPrerelease  bool
-	notes         string
-	notesFilename string
-	target        string
-	title         string
+	repository         string
+	isDraft            bool
+	isPrerelease       bool
+	discussionCategory string
+	notes              string
+	notesFilename      string
+	target             string
+	title              string
 }
 
 func (b *mockBumper) Bump() error {
@@ -32,6 +33,10 @@ func (b *mockBumper) WithDraft() {
 
 func (b *mockBumper) WithPrerelease() {
 	b.isPrerelease = true
+}
+
+func (b *mockBumper) WithDiscussionCategory(category string) {
+	b.discussionCategory = category
 }
 
 func (b *mockBumper) WithNotes(notes string) {
@@ -52,14 +57,15 @@ func (b *mockBumper) WithTarget(target string) {
 
 func TestNew(t *testing.T) {
 	tests := map[string]struct {
-		command           string
-		wantRepo          string
-		wantDraft         bool
-		wantNotes         string
-		wantNotesFilename string
-		wantPrerelease    bool
-		wantTarget        string
-		wantTitle         string
+		command                string
+		wantRepo               string
+		wantDraft              bool
+		wantPrerelease         bool
+		wantDiscussionCategory string
+		wantNotes              string
+		wantNotesFilename      string
+		wantTarget             string
+		wantTitle              string
 	}{
 		"repository given": {
 			command:  "bump -R johnmanjiro13/gh-bump",
@@ -76,6 +82,10 @@ func TestNew(t *testing.T) {
 		"with prerelease": {
 			command:        "bump --prerelease",
 			wantPrerelease: true,
+		},
+		"with discussion category": {
+			command:                "bump --discussion-category category!",
+			wantDiscussionCategory: "category!",
 		},
 		"with notes": {
 			command:   "bump --notes release",
@@ -105,6 +115,7 @@ func TestNew(t *testing.T) {
 			assert.Equal(t, tt.wantRepo, bumper.repository)
 			assert.Equal(t, tt.wantDraft, bumper.isDraft)
 			assert.Equal(t, tt.wantPrerelease, bumper.isPrerelease)
+			assert.Equal(t, tt.wantDiscussionCategory, bumper.discussionCategory)
 			assert.Equal(t, tt.wantNotes, bumper.notes)
 			assert.Equal(t, tt.wantNotesFilename, bumper.notesFilename)
 			assert.Equal(t, tt.wantTarget, bumper.target)

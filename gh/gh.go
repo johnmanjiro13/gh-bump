@@ -49,6 +49,9 @@ func (g *gh) CreateRelease(version string, repo string, isCurrent bool, option *
 	if option.IsPrerelease {
 		args = append(args, "--prerelease")
 	}
+	if option.DiscussionCategory != "" {
+		args = append(args, []string{"--discussion-category", option.DiscussionCategory}...)
+	}
 	if option.Notes != "" {
 		args = append(args, []string{"--notes", option.Notes}...)
 	}
