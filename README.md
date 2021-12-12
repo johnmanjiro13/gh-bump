@@ -16,6 +16,12 @@ with another repository.
 gh bump -R <repository>
 ```
 
+If you want to see more detail about this extension, you can run below.
+
+```
+gh bump -h
+```
+
 # Installation
 ```
 gh extension install johnmanjiro13/gh-bump
