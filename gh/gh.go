@@ -43,6 +43,9 @@ func (g *gh) CreateRelease(version string, repo string, isCurrent bool, option *
 	if !isCurrent {
 		args = append(args, []string{"-R", repo}...)
 	}
+	if option.IsDraft {
+		args = append(args, "--draft")
+	}
 	if option.IsPrerelease {
 		args = append(args, "--prerelease")
 	}

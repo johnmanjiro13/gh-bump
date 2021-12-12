@@ -7,14 +7,16 @@ import (
 type Bumper interface {
 	Bump() error
 	WithRepository(repository string) error
+	WithDraft()
 	WithPrerelease()
 	WithTitle(title string)
 	WithTarget(target string)
 }
 
-func NewCmd(bumper Bumper) *cobra.Command {
+func New(bumper Bumper) *cobra.Command {
 	var (
 		repository   string
+		isDraft      bool
 		isPrerelease bool
 		target       string
 		title        string
@@ -25,6 +27,9 @@ func NewCmd(bumper Bumper) *cobra.Command {
 		RunE: func(cmd *cobra.Command, args []string) error {
 			if err := bumper.WithRepository(repository); err != nil {
 				return err
+			}
+			if isDraft {
+				bumper.WithDraft()
 			}
 			if isPrerelease {
 				bumper.WithPrerelease()
@@ -40,6 +45,7 @@ func NewCmd(bumper Bumper) *cobra.Command {
 	}
 
 	cmd.Flags().StringVarP(&repository, "repo", "R", "", "Select another repository using the [HOST/]OWNER/REPO format")
+	cmd.Flags().BoolVarP(&isDraft, "draft", "d", false, "Save the release as a draft instead of publishing it")
 	cmd.Flags().BoolVarP(&isPrerelease, "prerelease", "p", false, "Mark the release as a prerelease")
 	cmd.Flags().StringVarP(&target, "target", "", "", "Target branch or full commit SHA (default: main branch)")
 	cmd.Flags().StringVarP(&title, "title", "t", "", "Release title")

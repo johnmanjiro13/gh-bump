@@ -19,6 +19,7 @@ type Gh interface {
 }
 
 type ReleaseOption struct {
+	IsDraft      bool
 	IsPrerelease bool
 	Target       string
 	Title        string
@@ -28,6 +29,7 @@ type bumper struct {
 	gh           Gh
 	repository   string
 	isCurrent    bool
+	isDraft      bool
 	isPrerelease bool
 	target       string
 	title        string
@@ -50,6 +52,10 @@ func (b *bumper) WithRepository(repository string) error {
 	b.repository = repo
 	b.isCurrent = true
 	return nil
+}
+
+func (b *bumper) WithDraft() {
+	b.isDraft = true
 }
 
 func (b *bumper) WithPrerelease() {
@@ -211,6 +217,7 @@ func (b *bumper) approve(next *semver.Version) (bool, error) {
 
 func (b *bumper) createRelease(version string) (string, error) {
 	option := &ReleaseOption{
+		IsDraft:      b.isDraft,
 		IsPrerelease: b.isPrerelease,
 		Target:       b.target,
 		Title:        b.title,
