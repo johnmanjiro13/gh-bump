@@ -9,6 +9,7 @@ import (
 
 type mockBumper struct {
 	repository   string
+	isDraft      bool
 	isPrerelease bool
 	target       string
 	title        string
@@ -21,6 +22,10 @@ func (b *mockBumper) Bump() error {
 func (b *mockBumper) WithRepository(repository string) error {
 	b.repository = repository
 	return nil
+}
+
+func (b *mockBumper) WithDraft() {
+	b.isDraft = true
 }
 
 func (b *mockBumper) WithPrerelease() {
@@ -39,6 +44,7 @@ func TestNewCmd(t *testing.T) {
 	tests := map[string]struct {
 		command        string
 		wantRepo       string
+		wantDraft      bool
 		wantPrerelease bool
 		wantTarget     string
 		wantTitle      string
@@ -50,6 +56,10 @@ func TestNewCmd(t *testing.T) {
 		"current repository": {
 			command:  "bump",
 			wantRepo: "",
+		},
+		"with draft": {
+			command:   "bump --draft",
+			wantDraft: true,
 		},
 		"with prerelease": {
 			command:        "bump --prerelease",
@@ -68,11 +78,12 @@ func TestNewCmd(t *testing.T) {
 	for name, tt := range tests {
 		t.Run(name, func(t *testing.T) {
 			bumper := &mockBumper{}
-			cmd := NewCmd(bumper)
+			cmd := New(bumper)
 			cmd.SetArgs(strings.Split(tt.command, " ")[1:])
 
 			assert.NoError(t, cmd.Execute())
 			assert.Equal(t, tt.wantRepo, bumper.repository)
+			assert.Equal(t, tt.wantDraft, bumper.isDraft)
 			assert.Equal(t, tt.wantPrerelease, bumper.isPrerelease)
 			assert.Equal(t, tt.wantTarget, bumper.target)
 			assert.Equal(t, tt.wantTitle, bumper.title)

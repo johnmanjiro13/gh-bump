@@ -15,7 +15,7 @@ func main() {
 func run() int {
 	ghCLI := gh.New()
 	bumper := bump.New(ghCLI)
-	rootCmd := cmd.NewCmd(bumper)
+	rootCmd := cmd.New(bumper)
 	if err := rootCmd.Execute(); err != nil {
 		return 1
 	}
