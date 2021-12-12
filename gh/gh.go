@@ -43,6 +43,9 @@ func (g *gh) CreateRelease(version string, repo string, isCurrent bool, option *
 	if !isCurrent {
 		args = append(args, []string{"-R", repo}...)
 	}
+	if option.Target != "" {
+		args = append(args, []string{"--target", option.Target}...)
+	}
 	if option.Title != "" {
 		args = append(args, []string{"-t", option.Title}...)
 	}

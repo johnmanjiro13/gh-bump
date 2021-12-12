@@ -8,11 +8,13 @@ type Bumper interface {
 	Bump() error
 	WithRepository(repository string) error
 	WithTitle(title string)
+	WithTarget(target string)
 }
 
 func NewCmd(bumper Bumper) *cobra.Command {
 	var (
 		repository string
+		target     string
 		title      string
 	)
 	cmd := &cobra.Command{
@@ -22,6 +24,9 @@ func NewCmd(bumper Bumper) *cobra.Command {
 			if err := bumper.WithRepository(repository); err != nil {
 				return err
 			}
+			if target != "" {
+				bumper.WithTarget(target)
+			}
 			if title != "" {
 				bumper.WithTitle(title)
 			}
@@ -30,6 +35,7 @@ func NewCmd(bumper Bumper) *cobra.Command {
 	}
 
 	cmd.Flags().StringVarP(&repository, "repo", "R", "", "Select another repository using the [HOST/]OWNER/REPO format")
+	cmd.Flags().StringVarP(&target, "target", "", "", "Target branch or full commit SHA (default: main branch)")
 	cmd.Flags().StringVarP(&title, "title", "t", "", "Release title")
 	return cmd
 }
