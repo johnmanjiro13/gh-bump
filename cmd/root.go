@@ -10,6 +10,7 @@ type Bumper interface {
 	WithDraft()
 	WithPrerelease()
 	WithDiscussionCategory(category string)
+	WithGenerateNotes()
 	WithNotes(notes string)
 	WithNotesFile(filename string)
 	WithTitle(title string)
@@ -22,6 +23,7 @@ func New(bumper Bumper) *cobra.Command {
 		isDraft            bool
 		isPrerelease       bool
 		discussionCategory string
+		generateNotes      bool
 		notes              string
 		notesFile          string
 		target             string
@@ -43,6 +45,9 @@ func New(bumper Bumper) *cobra.Command {
 			if discussionCategory != "" {
 				bumper.WithDiscussionCategory(discussionCategory)
 			}
+			if generateNotes {
+				bumper.WithGenerateNotes()
+			}
 			if notes != "" {
 				bumper.WithNotes(notes)
 			}
@@ -63,6 +68,7 @@ func New(bumper Bumper) *cobra.Command {
 	cmd.Flags().BoolVarP(&isDraft, "draft", "d", false, "Save the release as a draft instead of publishing it")
 	cmd.Flags().BoolVarP(&isPrerelease, "prerelease", "p", false, "Mark the release as a prerelease")
 	cmd.Flags().StringVarP(&discussionCategory, "discussion-category", "", "", "Start a discussion of the specified category")
+	cmd.Flags().BoolVarP(&generateNotes, "generate-notes", "g", false, "Automatically generate title and notes for the release")
 	cmd.Flags().StringVarP(&notes, "notes", "n", "", "Release notes")
 	cmd.Flags().StringVarP(&notesFile, "notes-file", "F", "", "Read release notes from file")
 	cmd.Flags().StringVarP(&target, "target", "", "", "Target branch or full commit SHA (default: main branch)")
