@@ -12,6 +12,7 @@ type mockBumper struct {
 	isDraft            bool
 	isPrerelease       bool
 	discussionCategory string
+	generateNotes      bool
 	notes              string
 	notesFilename      string
 	target             string
@@ -39,6 +40,10 @@ func (b *mockBumper) WithDiscussionCategory(category string) {
 	b.discussionCategory = category
 }
 
+func (b *mockBumper) WithGenerateNotes() {
+	b.generateNotes = true
+}
+
 func (b *mockBumper) WithNotes(notes string) {
 	b.notes = notes
 }
@@ -62,6 +67,7 @@ func TestNew(t *testing.T) {
 		wantDraft              bool
 		wantPrerelease         bool
 		wantDiscussionCategory string
+		generateNotes          bool
 		wantNotes              string
 		wantNotesFilename      string
 		wantTarget             string
@@ -86,6 +92,10 @@ func TestNew(t *testing.T) {
 		"with discussion category": {
 			command:                "bump --discussion-category category!",
 			wantDiscussionCategory: "category!",
+		},
+		"with generate-notes": {
+			command:       "bump --generate-notes",
+			generateNotes: true,
 		},
 		"with notes": {
 			command:   "bump --notes release",

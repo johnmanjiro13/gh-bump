@@ -22,6 +22,7 @@ type ReleaseOption struct {
 	IsDraft            bool
 	IsPrerelease       bool
 	DiscussionCategory string
+	GenerateNotes      bool
 	Notes              string
 	NotesFilename      string
 	Target             string
@@ -35,6 +36,7 @@ type bumper struct {
 	isDraft            bool
 	isPrerelease       bool
 	discussionCategory string
+	generateNotes      bool
 	notes              string
 	notesFilename      string
 	target             string
@@ -70,6 +72,10 @@ func (b *bumper) WithPrerelease() {
 
 func (b *bumper) WithDiscussionCategory(category string) {
 	b.discussionCategory = category
+}
+
+func (b *bumper) WithGenerateNotes() {
+	b.generateNotes = true
 }
 
 func (b *bumper) WithNotes(notes string) {
@@ -238,6 +244,7 @@ func (b *bumper) createRelease(version string) (string, error) {
 		IsDraft:            b.isDraft,
 		IsPrerelease:       b.isPrerelease,
 		DiscussionCategory: b.discussionCategory,
+		GenerateNotes:      b.generateNotes,
 		Notes:              b.notes,
 		NotesFilename:      b.notesFilename,
 		Target:             b.target,
