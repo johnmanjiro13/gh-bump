@@ -67,7 +67,7 @@ func TestNew(t *testing.T) {
 		wantDraft              bool
 		wantPrerelease         bool
 		wantDiscussionCategory string
-		generateNotes          bool
+		wantGenerateNotes      bool
 		wantNotes              string
 		wantNotesFilename      string
 		wantTarget             string
@@ -94,8 +94,8 @@ func TestNew(t *testing.T) {
 			wantDiscussionCategory: "category!",
 		},
 		"with generate-notes": {
-			command:       "bump --generate-notes",
-			generateNotes: true,
+			command:           "bump --generate-notes",
+			wantGenerateNotes: true,
 		},
 		"with notes": {
 			command:   "bump --notes release",
@@ -126,6 +126,7 @@ func TestNew(t *testing.T) {
 			assert.Equal(t, tt.wantDraft, bumper.isDraft)
 			assert.Equal(t, tt.wantPrerelease, bumper.isPrerelease)
 			assert.Equal(t, tt.wantDiscussionCategory, bumper.discussionCategory)
+			assert.Equal(t, tt.wantGenerateNotes, bumper.generateNotes)
 			assert.Equal(t, tt.wantNotes, bumper.notes)
 			assert.Equal(t, tt.wantNotesFilename, bumper.notesFilename)
 			assert.Equal(t, tt.wantTarget, bumper.target)
