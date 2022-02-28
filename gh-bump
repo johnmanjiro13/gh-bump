@@ -2,7 +2,7 @@
 set -e
 
 repo="johnmanjiro13/gh-bump"
-tag="v0.3.0"
+tag="v0.4.0"
 
 extensionPath="$(dirname "$0")"
 arch="$(uname -m)"
