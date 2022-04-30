@@ -2,7 +2,7 @@ name: release-drafter
 on:
   workflow_run:
     workflows:
-      - ci
+      - build
     brances:
       - main
     types:
