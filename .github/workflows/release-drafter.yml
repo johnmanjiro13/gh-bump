@@ -1,0 +1,16 @@
+name: release-drafter
+on:
+  workflow_run:
+    workflows:
+      - ci
+    brances:
+      - main
+    types:
+      - completed
+jobs:
+  update_release_draft:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: release-drafter/release-drafter@v5
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
