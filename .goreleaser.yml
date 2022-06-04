@@ -18,7 +18,7 @@ builds:
       - goos: windows
         goarch: arm64
 archives:
-  - name_template: '{{ .ProjectName }}_{{ .Os }}_{{ .Arch }}_{{ .Tag }}'
+  - name_template: '{{ .Os }}_{{ .Arch }}'
     format: binary
     replacements:
       darwin: Darwin
