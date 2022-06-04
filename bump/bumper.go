@@ -7,8 +7,6 @@ import (
 
 	"github.com/Masterminds/semver/v3"
 	"github.com/manifoldco/promptui"
-
-	"github.com/johnmanjiro13/gh-bump/cmd"
 )
 
 type Gh interface {
@@ -43,7 +41,7 @@ type bumper struct {
 	title              string
 }
 
-func New(gh Gh) cmd.Bumper {
+func New(gh Gh) *bumper {
 	return &bumper{gh: gh}
 }
 
@@ -109,13 +107,13 @@ func (b *bumper) Bump() error {
 	if isInitial {
 		nextVer = current
 	} else {
-		nextVer, err = b.nextVersion(current)
+		nextVer, err = nextVersion(current)
 		if err != nil {
 			return err
 		}
 	}
 
-	ok, err := b.approve(nextVer)
+	ok, err := approve(nextVer)
 	if err != nil {
 		return err
 	}
@@ -194,7 +192,7 @@ func newVersion() (*semver.Version, error) {
 	return semver.NewVersion(result)
 }
 
-func (b *bumper) nextVersion(current *semver.Version) (*semver.Version, error) {
+func nextVersion(current *semver.Version) (*semver.Version, error) {
 	prompt := promptui.Select{
 		Label: fmt.Sprintf("Select next version. current: %s", current.Original()),
 		Items: []string{"patch", "minor", "major"},
@@ -218,7 +216,7 @@ func (b *bumper) nextVersion(current *semver.Version) (*semver.Version, error) {
 	return &next, nil
 }
 
-func (b *bumper) approve(next *semver.Version) (bool, error) {
+func approve(next *semver.Version) (bool, error) {
 	validate := func(input string) error {
 		if input != "y" && input != "yes" && input != "n" && input != "no" {
 			return fmt.Errorf("invalid character. press y/n")

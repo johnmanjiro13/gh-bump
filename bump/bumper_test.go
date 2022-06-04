@@ -1,10 +1,11 @@
-package bump
+package bump_test
 
 import (
 	"bytes"
 	"fmt"
 	"testing"
 
+	"github.com/johnmanjiro13/gh-bump/bump"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -30,7 +31,7 @@ func (g *mockGh) ViewRelease(repo string, isCurrent bool) (sout, eout bytes.Buff
 	return
 }
 
-func (g *mockGh) CreateRelease(version string, repo string, isCurrent bool, option *ReleaseOption) (sout, eout bytes.Buffer, err error) {
+func (g *mockGh) CreateRelease(version string, repo string, isCurrent bool, option *bump.ReleaseOption) (sout, eout bytes.Buffer, err error) {
 	sout.WriteString(version)
 	return
 }
@@ -55,32 +56,32 @@ func TestBumper_WithRepository(t *testing.T) {
 
 	for name, tt := range tests {
 		t.Run(name, func(t *testing.T) {
-			b := &bumper{gh: &mockGh{}}
+			b := bump.New(&mockGh{})
 			assert.NoError(t, b.WithRepository(tt.repository))
 
-			assert.Equal(t, tt.wantRepository, b.repository)
-			assert.Equal(t, tt.wantIsCurrent, b.isCurrent)
+			assert.Equal(t, tt.wantRepository, b.Repository())
+			assert.Equal(t, tt.wantIsCurrent, b.IsCurrent())
 		})
 	}
 }
 
 func TestBumper_ResolveRepository(t *testing.T) {
-	b := &bumper{gh: &mockGh{}}
-	got, err := b.resolveRepository()
+	b := bump.New(&mockGh{})
+	got, err := bump.ResolveRepository(b)
 	assert.NoError(t, err)
 	assert.Equal(t, "johnmanjiro13/gh-bump", got)
 }
 
 func TestBumper_listReleases(t *testing.T) {
-	b := &bumper{gh: &mockGh{}}
-	got, err := b.listReleases()
+	b := bump.New(&mockGh{})
+	got, err := bump.ListReleases(b)
 	assert.NoError(t, err)
 	assert.Equal(t, fmt.Sprintf("Tags:\n%s", tagList), got)
 }
 
 func TestBumper_createRelease(t *testing.T) {
-	b := &bumper{gh: &mockGh{}}
-	got, err := b.createRelease("v1.0.0")
+	b := bump.New(&mockGh{})
+	got, err := bump.CreateRelease(b, "v1.0.0")
 	assert.NoError(t, err)
 	assert.Equal(t, "v1.0.0", got)
 }
