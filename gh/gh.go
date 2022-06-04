@@ -12,15 +12,15 @@ import (
 
 type gh struct{}
 
-func New() bump.Gh {
+func New() *gh {
 	return &gh{}
 }
 
-func (g *gh) ViewRepository() (sout, eout bytes.Buffer, err error) {
+func (g *gh) ViewRepository() (sout, eout *bytes.Buffer, err error) {
 	return runGh("repo", "view")
 }
 
-func (g *gh) ListRelease(repo string, isCurrent bool) (sout, eout bytes.Buffer, err error) {
+func (g *gh) ListRelease(repo string, isCurrent bool) (sout, eout *bytes.Buffer, err error) {
 	if isCurrent {
 		sout, eout, err = runGh("release", "list")
 	} else {
@@ -29,7 +29,7 @@ func (g *gh) ListRelease(repo string, isCurrent bool) (sout, eout bytes.Buffer, 
 	return
 }
 
-func (g *gh) ViewRelease(repo string, isCurrent bool) (sout, eout bytes.Buffer, err error) {
+func (g *gh) ViewRelease(repo string, isCurrent bool) (sout, eout *bytes.Buffer, err error) {
 	if isCurrent {
 		sout, eout, err = runGh("release", "view")
 	} else {
@@ -38,7 +38,7 @@ func (g *gh) ViewRelease(repo string, isCurrent bool) (sout, eout bytes.Buffer, 
 	return
 }
 
-func (g *gh) CreateRelease(version string, repo string, isCurrent bool, option *bump.ReleaseOption) (sout, eout bytes.Buffer, err error) {
+func (g *gh) CreateRelease(version string, repo string, isCurrent bool, option *bump.ReleaseOption) (sout, eout *bytes.Buffer, err error) {
 	args := []string{"release", "create", version}
 	if !isCurrent {
 		args = append(args, []string{"-R", repo}...)
@@ -71,7 +71,7 @@ func (g *gh) CreateRelease(version string, repo string, isCurrent bool, option *
 	return
 }
 
-func runGh(args ...string) (sout, eout bytes.Buffer, err error) {
+func runGh(args ...string) (sout, eout *bytes.Buffer, err error) {
 	ghBin, err := safeexec.LookPath("gh")
 	if err != nil {
 		err = fmt.Errorf("could not find gh. err: %w", err)
@@ -79,8 +79,8 @@ func runGh(args ...string) (sout, eout bytes.Buffer, err error) {
 	}
 
 	cmd := exec.Command(ghBin, args...)
-	cmd.Stdout = &sout
-	cmd.Stderr = &eout
+	cmd.Stdout = sout
+	cmd.Stderr = eout
 
 	err = cmd.Run()
 	if err != nil {
