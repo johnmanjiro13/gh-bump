@@ -18,16 +18,8 @@ builds:
       - goos: windows
         goarch: arm64
 archives:
-  - name_template: '{{ .Os }}_{{ .Arch }}'
+  - name_template: '{{ .Os }}-{{ .Arch }}'
     format: binary
-    replacements:
-      darwin: Darwin
-      linux: Linux
-      windows: Windows
-      386: i386
-      amd64: x86_64
-checksum:
-  name_template: '{{ .ProjectName }}_checksums.txt'
 snapshot:
   name_template: "{{ .Tag }}-next"
 changelog:
