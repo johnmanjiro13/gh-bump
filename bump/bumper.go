@@ -202,6 +202,10 @@ func nextVersion(current *semver.Version) (*semver.Version, error) {
 		return nil, fmt.Errorf("failed to prompt. err: %w", err)
 	}
 
+	return incrementVersion(current, bumpType)
+}
+
+func incrementVersion(current *semver.Version, bumpType string) (*semver.Version, error) {
 	var next semver.Version
 	switch bumpType {
 	case "major":

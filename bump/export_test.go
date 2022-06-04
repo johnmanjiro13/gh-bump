@@ -4,6 +4,8 @@ var (
 	ResolveRepository = (*bumper).resolveRepository
 	ListReleases      = (*bumper).listReleases
 	CreateRelease     = (*bumper).createRelease
+	CurrentVersion    = (*bumper).currentVersion
+	IncrementVersion  = incrementVersion
 )
 
 func (b *bumper) Repository() string {
