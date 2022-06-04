@@ -53,6 +53,94 @@ func TestBumper_WithRepository(t *testing.T) {
 	}
 }
 
+func TestBumper_WithDraft(t *testing.T) {
+	ctrl := gomock.NewController(t)
+	defer ctrl.Finish()
+
+	gh := mock_bump.NewMockGh(ctrl)
+	b := bump.New(gh)
+	b.WithDraft()
+
+	assert.True(t, b.IsDraft())
+}
+
+func TestBumper_WithPrerelease(t *testing.T) {
+	ctrl := gomock.NewController(t)
+	defer ctrl.Finish()
+
+	gh := mock_bump.NewMockGh(ctrl)
+	b := bump.New(gh)
+	b.WithPrerelease()
+
+	assert.True(t, b.IsPrerelease())
+}
+
+func TestBumper_WithDiscussionCategory(t *testing.T) {
+	ctrl := gomock.NewController(t)
+	defer ctrl.Finish()
+
+	gh := mock_bump.NewMockGh(ctrl)
+	b := bump.New(gh)
+	b.WithDiscussionCategory("test")
+
+	assert.Equal(t, "test", b.DiscussionCategory())
+}
+
+func TestBumper_WithGenerateNotes(t *testing.T) {
+	ctrl := gomock.NewController(t)
+	defer ctrl.Finish()
+
+	gh := mock_bump.NewMockGh(ctrl)
+	b := bump.New(gh)
+	b.WithGenerateNotes()
+
+	assert.True(t, b.GenerateNotes())
+}
+
+func TestBumper_WithNotes(t *testing.T) {
+	ctrl := gomock.NewController(t)
+	defer ctrl.Finish()
+
+	gh := mock_bump.NewMockGh(ctrl)
+	b := bump.New(gh)
+	b.WithNotes("note")
+
+	assert.Equal(t, "note", b.Notes())
+}
+
+func TestBumper_WithNotesFile(t *testing.T) {
+	ctrl := gomock.NewController(t)
+	defer ctrl.Finish()
+
+	gh := mock_bump.NewMockGh(ctrl)
+	b := bump.New(gh)
+	b.WithNotesFile("filename")
+
+	assert.Equal(t, "filename", b.NotesFilename())
+}
+
+func TestBumper_WithTarget(t *testing.T) {
+	ctrl := gomock.NewController(t)
+	defer ctrl.Finish()
+
+	gh := mock_bump.NewMockGh(ctrl)
+	b := bump.New(gh)
+	b.WithTarget("target")
+
+	assert.Equal(t, "target", b.Target())
+}
+
+func TestBumper_WithTitle(t *testing.T) {
+	ctrl := gomock.NewController(t)
+	defer ctrl.Finish()
+
+	gh := mock_bump.NewMockGh(ctrl)
+	b := bump.New(gh)
+	b.WithTitle("title")
+
+	assert.Equal(t, "title", b.Title())
+}
+
 func TestBumper_ResolveRepository(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
