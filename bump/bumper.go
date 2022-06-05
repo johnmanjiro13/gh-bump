@@ -156,7 +156,7 @@ func (b *bumper) currentVersion() (*semver.Version, bool, error) {
 	sout, eout, err := b.gh.ViewRelease(b.repository, b.isCurrent)
 	if err != nil {
 		if strings.Contains(eout.String(), "HTTP 404: Not Found") {
-			current, err := newVersion()
+			current, err := newVersion(os.Stdin, os.Stdout)
 			if err != nil {
 				return nil, isInitial, err
 			}
@@ -174,7 +174,7 @@ func (b *bumper) currentVersion() (*semver.Version, bool, error) {
 	return current, isInitial, nil
 }
 
-func newVersion() (*semver.Version, error) {
+func newVersion(sin io.ReadCloser, sout io.WriteCloser) (*semver.Version, error) {
 	validate := func(input string) error {
 		_, err := semver.NewVersion(input)
 		if err != nil {
@@ -186,6 +186,8 @@ func newVersion() (*semver.Version, error) {
 	prompt := promptui.Prompt{
 		Label:    "New version",
 		Validate: validate,
+		Stdin:    sin,
+		Stdout:   sout,
 	}
 	result, err := prompt.Run()
 	if err != nil {

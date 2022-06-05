@@ -202,6 +202,14 @@ func (m *mockWriteCloser) Close() error {
 	return nil
 }
 
+func TestNewVersion(t *testing.T) {
+	sin := io.NopCloser(strings.NewReader("v0.1.0\n"))
+	sout := &mockWriteCloser{bytes.Buffer{}}
+	newVer, err := bump.NewVersion(sin, sout)
+	assert.NoError(t, err)
+	assert.Equal(t, semver.MustParse("v0.1.0"), newVer)
+}
+
 func TestNextVersion(t *testing.T) {
 	sin := io.NopCloser(strings.NewReader(string(arrowDownAndEnter)))
 	sout := &mockWriteCloser{bytes.Buffer{}}
@@ -252,6 +260,7 @@ func TestIncrementVersion(t *testing.T) {
 	tests := map[string]struct {
 		bumpType string
 		want     *semver.Version
+		wantErr  error
 	}{
 		"major": {
 			bumpType: "major",
@@ -265,12 +274,16 @@ func TestIncrementVersion(t *testing.T) {
 			bumpType: "patch",
 			want:     semver.MustParse("v0.1.1"),
 		},
+		"invalid": {
+			bumpType: "invalid",
+			wantErr:  fmt.Errorf("invalid type"),
+		},
 	}
 
 	for name, tt := range tests {
 		t.Run(name, func(t *testing.T) {
 			got, err := bump.IncrementVersion(current, tt.bumpType)
-			assert.NoError(t, err)
+			assert.Equal(t, tt.wantErr, err)
 			assert.Equal(t, tt.want, got)
 		})
 	}

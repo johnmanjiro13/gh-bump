@@ -5,6 +5,7 @@ var (
 	ListReleases      = (*bumper).listReleases
 	CreateRelease     = (*bumper).createRelease
 	CurrentVersion    = (*bumper).currentVersion
+	NewVersion        = newVersion
 	NextVersion       = nextVersion
 	IncrementVersion  = incrementVersion
 	Approve           = approve
