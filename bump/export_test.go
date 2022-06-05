@@ -54,3 +54,7 @@ func (b *bumper) Title() string {
 func (b *bumper) BumpType() BumpType {
 	return b.bumpType
 }
+
+func (b *bumper) Yes() bool {
+	return b.yes
+}

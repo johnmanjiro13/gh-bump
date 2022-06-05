@@ -180,6 +180,16 @@ func TestBumper_WithBumpType(t *testing.T) {
 	}
 }
 
+func TestBumper_WithYes(t *testing.T) {
+	ctrl := gomock.NewController(t)
+	defer ctrl.Finish()
+
+	gh := mock_bump.NewMockGh(ctrl)
+	b := bump.New(gh)
+	b.WithYes()
+	assert.True(t, b.Yes())
+}
+
 func TestBumper_ResolveRepository(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()

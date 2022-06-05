@@ -16,6 +16,7 @@ type Bumper interface {
 	WithTitle(title string)
 	WithTarget(target string)
 	WithBumpType(bumpType string) error
+	WithYes()
 }
 
 func New(bumper Bumper) *cobra.Command {
@@ -30,6 +31,7 @@ func New(bumper Bumper) *cobra.Command {
 		target             string
 		title              string
 		bumpType           string
+		yes                bool
 	)
 	cmd := &cobra.Command{
 		Use:   "bump",
@@ -68,6 +70,9 @@ func New(bumper Bumper) *cobra.Command {
 					return err
 				}
 			}
+			if yes {
+				bumper.WithYes()
+			}
 			return bumper.Bump()
 		},
 	}
@@ -82,5 +87,6 @@ func New(bumper Bumper) *cobra.Command {
 	cmd.Flags().StringVarP(&target, "target", "", "", "Target branch or full commit SHA (default: main branch)")
 	cmd.Flags().StringVarP(&title, "title", "t", "", "Release title")
 	cmd.Flags().StringVarP(&bumpType, "bump-type", "", "", "Bump type (major, minor or patch)")
+	cmd.Flags().BoolVarP(&yes, "yes", "y", false, "Answer 'yes' to all questions")
 	return cmd
 }

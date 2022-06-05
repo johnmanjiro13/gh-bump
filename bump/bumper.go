@@ -42,6 +42,7 @@ type bumper struct {
 	target             string
 	title              string
 	bumpType           BumpType
+	yes                bool
 }
 
 func New(gh Gh) *bumper {
@@ -104,6 +105,10 @@ func (b *bumper) WithBumpType(s string) error {
 	return nil
 }
 
+func (b *bumper) WithYes() {
+	b.yes = true
+}
+
 func (b *bumper) Bump() error {
 	releases, err := b.listReleases()
 	if err != nil {
@@ -130,13 +135,16 @@ func (b *bumper) Bump() error {
 		}
 	}
 
-	ok, err := approve(nextVer, os.Stdin, os.Stdout)
-	if err != nil {
-		return err
-	}
-	if !ok {
-		fmt.Println("Bump was canceled.")
-		return nil
+	// Skip approval if --yes is set
+	if !b.yes {
+		ok, err := approve(nextVer, os.Stdin, os.Stdout)
+		if err != nil {
+			return err
+		}
+		if !ok {
+			fmt.Println("Bump was canceled.")
+			return nil
+		}
 	}
 
 	result, err := b.createRelease(nextVer.Original())

@@ -4,6 +4,7 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/johnmanjiro13/gh-bump/bump"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -17,6 +18,8 @@ type mockBumper struct {
 	notesFilename      string
 	target             string
 	title              string
+	bumpType           bump.BumpType
+	yes                bool
 }
 
 func (b *mockBumper) Bump() error {
@@ -60,6 +63,19 @@ func (b *mockBumper) WithTarget(target string) {
 	b.target = target
 }
 
+func (b *mockBumper) WithBumpType(s string) error {
+	bumpType, err := bump.ParseBumpType(s)
+	if err != nil {
+		return err
+	}
+	b.bumpType = bumpType
+	return nil
+}
+
+func (b *mockBumper) WithYes() {
+	b.yes = true
+}
+
 func TestNew(t *testing.T) {
 	tests := map[string]struct {
 		command                string
@@ -72,6 +88,8 @@ func TestNew(t *testing.T) {
 		wantNotesFilename      string
 		wantTarget             string
 		wantTitle              string
+		wantBumpType           bump.BumpType
+		wantYes                bool
 	}{
 		"repository given": {
 			command:  "bump -R johnmanjiro13/gh-bump",
@@ -113,6 +131,14 @@ func TestNew(t *testing.T) {
 			command:   "bump -t test_title",
 			wantTitle: "test_title",
 		},
+		"with bump type": {
+			command:      "bump --bump-type major",
+			wantBumpType: bump.Major,
+		},
+		"with yes": {
+			command: "bump --yes",
+			wantYes: true,
+		},
 	}
 
 	for name, tt := range tests {
@@ -131,6 +157,8 @@ func TestNew(t *testing.T) {
 			assert.Equal(t, tt.wantNotesFilename, bumper.notesFilename)
 			assert.Equal(t, tt.wantTarget, bumper.target)
 			assert.Equal(t, tt.wantTitle, bumper.title)
+			assert.Equal(t, tt.wantBumpType, bumper.bumpType)
+			assert.Equal(t, tt.wantYes, bumper.yes)
 		})
 	}
 }
