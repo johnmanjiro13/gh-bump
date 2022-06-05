@@ -4,8 +4,9 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/johnmanjiro13/gh-bump/bump"
 	"github.com/stretchr/testify/assert"
+
+	"github.com/johnmanjiro13/gh-bump/bump"
 )
 
 func TestBumpType_String(t *testing.T) {

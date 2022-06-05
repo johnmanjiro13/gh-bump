@@ -121,13 +121,13 @@ func (b *bumper) Bump() error {
 		return err
 	}
 	var nextVer *semver.Version
-	if b.bumpType.Valid() == nil && !b.bumpType.IsBlank() {
+	if isInitial {
+		nextVer = current
+	} else if b.bumpType.Valid() == nil && !b.bumpType.IsBlank() {
 		nextVer, err = incrementVersion(current, b.bumpType.String())
 		if err != nil {
 			return err
 		}
-	} else if isInitial {
-		nextVer = current
 	} else {
 		nextVer, err = nextVersion(current, os.Stdin, os.Stdout)
 		if err != nil {

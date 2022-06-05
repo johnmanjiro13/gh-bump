@@ -4,8 +4,9 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/johnmanjiro13/gh-bump/bump"
 	"github.com/stretchr/testify/assert"
+
+	"github.com/johnmanjiro13/gh-bump/bump"
 )
 
 type mockBumper struct {
