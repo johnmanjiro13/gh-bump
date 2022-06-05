@@ -41,6 +41,7 @@ type bumper struct {
 	notesFilename      string
 	target             string
 	title              string
+	bumpType           BumpType
 }
 
 func New(gh Gh) *bumper {
@@ -94,6 +95,15 @@ func (b *bumper) WithTitle(title string) {
 	b.title = title
 }
 
+func (b *bumper) WithBumpType(s string) error {
+	bumpType, err := ParseBumpType(s)
+	if err != nil {
+		return err
+	}
+	b.bumpType = bumpType
+	return nil
+}
+
 func (b *bumper) Bump() error {
 	releases, err := b.listReleases()
 	if err != nil {
@@ -106,7 +116,12 @@ func (b *bumper) Bump() error {
 		return err
 	}
 	var nextVer *semver.Version
-	if isInitial {
+	if b.bumpType.Valid() == nil && !b.bumpType.IsBlank() {
+		nextVer, err = incrementVersion(current, b.bumpType.String())
+		if err != nil {
+			return err
+		}
+	} else if isInitial {
 		nextVer = current
 	} else {
 		nextVer, err = nextVersion(current, os.Stdin, os.Stdout)

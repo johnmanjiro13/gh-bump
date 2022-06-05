@@ -15,6 +15,7 @@ type Bumper interface {
 	WithNotesFile(filename string)
 	WithTitle(title string)
 	WithTarget(target string)
+	WithBumpType(bumpType string) error
 }
 
 func New(bumper Bumper) *cobra.Command {
@@ -28,6 +29,7 @@ func New(bumper Bumper) *cobra.Command {
 		notesFile          string
 		target             string
 		title              string
+		bumpType           string
 	)
 	cmd := &cobra.Command{
 		Use:   "bump",
@@ -60,6 +62,12 @@ func New(bumper Bumper) *cobra.Command {
 			if title != "" {
 				bumper.WithTitle(title)
 			}
+			if bumpType != "" {
+				err := bumper.WithBumpType(bumpType)
+				if err != nil {
+					return err
+				}
+			}
 			return bumper.Bump()
 		},
 	}
@@ -73,5 +81,6 @@ func New(bumper Bumper) *cobra.Command {
 	cmd.Flags().StringVarP(&notesFile, "notes-file", "F", "", "Read release notes from file")
 	cmd.Flags().StringVarP(&target, "target", "", "", "Target branch or full commit SHA (default: main branch)")
 	cmd.Flags().StringVarP(&title, "title", "t", "", "Release title")
+	cmd.Flags().StringVarP(&bumpType, "bump-type", "", "", "Bump type (major, minor or patch)")
 	return cmd
 }

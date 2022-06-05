@@ -148,6 +148,38 @@ func TestBumper_WithTitle(t *testing.T) {
 	assert.Equal(t, "title", b.Title())
 }
 
+func TestBumper_WithBumpType(t *testing.T) {
+	ctrl := gomock.NewController(t)
+	defer ctrl.Finish()
+
+	gh := mock_bump.NewMockGh(ctrl)
+	tests := map[string]struct {
+		s       string
+		want    bump.BumpType
+		wantErr error
+	}{
+		"major": {
+			s:       "major",
+			want:    bump.Major,
+			wantErr: nil,
+		},
+		"invalid": {
+			s:       "invalid",
+			want:    "",
+			wantErr: fmt.Errorf("%w: got invalid", bump.ErrInvalidBumpType),
+		},
+	}
+
+	for name, tt := range tests {
+		t.Run(name, func(t *testing.T) {
+			b := bump.New(gh)
+			err := b.WithBumpType(tt.s)
+			assert.Equal(t, tt.want, b.BumpType())
+			assert.Equal(t, tt.wantErr, err)
+		})
+	}
+}
+
 func TestBumper_ResolveRepository(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
