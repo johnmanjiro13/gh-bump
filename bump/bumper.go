@@ -41,6 +41,8 @@ type bumper struct {
 	notesFilename      string
 	target             string
 	title              string
+	bumpType           BumpType
+	yes                bool
 }
 
 func New(gh Gh) *bumper {
@@ -94,6 +96,19 @@ func (b *bumper) WithTitle(title string) {
 	b.title = title
 }
 
+func (b *bumper) WithBumpType(s string) error {
+	bumpType, err := ParseBumpType(s)
+	if err != nil {
+		return err
+	}
+	b.bumpType = bumpType
+	return nil
+}
+
+func (b *bumper) WithYes() {
+	b.yes = true
+}
+
 func (b *bumper) Bump() error {
 	releases, err := b.listReleases()
 	if err != nil {
@@ -108,6 +123,11 @@ func (b *bumper) Bump() error {
 	var nextVer *semver.Version
 	if isInitial {
 		nextVer = current
+	} else if b.bumpType.Valid() == nil && !b.bumpType.IsBlank() {
+		nextVer, err = incrementVersion(current, b.bumpType.String())
+		if err != nil {
+			return err
+		}
 	} else {
 		nextVer, err = nextVersion(current, os.Stdin, os.Stdout)
 		if err != nil {
@@ -115,13 +135,16 @@ func (b *bumper) Bump() error {
 		}
 	}
 
-	ok, err := approve(nextVer, os.Stdin, os.Stdout)
-	if err != nil {
-		return err
-	}
-	if !ok {
-		fmt.Println("Bump was canceled.")
-		return nil
+	// Skip approval if --yes is set
+	if !b.yes {
+		ok, err := approve(nextVer, os.Stdin, os.Stdout)
+		if err != nil {
+			return err
+		}
+		if !ok {
+			fmt.Println("Bump was canceled.")
+			return nil
+		}
 	}
 
 	result, err := b.createRelease(nextVer.Original())

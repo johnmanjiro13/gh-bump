@@ -50,3 +50,11 @@ func (b *bumper) Target() string {
 func (b *bumper) Title() string {
 	return b.title
 }
+
+func (b *bumper) BumpType() BumpType {
+	return b.bumpType
+}
+
+func (b *bumper) Yes() bool {
+	return b.yes
+}
