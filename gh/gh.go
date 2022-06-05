@@ -72,6 +72,8 @@ func (g *gh) CreateRelease(version string, repo string, isCurrent bool, option *
 }
 
 func runGh(args ...string) (sout, eout *bytes.Buffer, err error) {
+	sout = new(bytes.Buffer)
+	eout = new(bytes.Buffer)
 	ghBin, err := safeexec.LookPath("gh")
 	if err != nil {
 		err = fmt.Errorf("could not find gh. err: %w", err)
