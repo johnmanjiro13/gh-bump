@@ -151,27 +151,25 @@ func (b *bumper) listReleases() (string, error) {
 	return fmt.Sprintf("Tags:\n%s", sout.String()), nil
 }
 
-func (b *bumper) currentVersion() (*semver.Version, bool, error) {
-	var isInitial bool
+func (b *bumper) currentVersion() (current *semver.Version, isInitial bool, err error) {
 	sout, eout, err := b.gh.ViewRelease(b.repository, b.isCurrent)
 	if err != nil {
 		if strings.Contains(eout.String(), "HTTP 404: Not Found") {
-			current, err := newVersion(os.Stdin, os.Stdout)
+			current, err = newVersion(os.Stdin, os.Stdout)
 			if err != nil {
-				return nil, isInitial, err
+				return nil, false, err
 			}
-			isInitial = true
-			return current, isInitial, nil
+			return current, true, nil
 		}
-		return nil, isInitial, err
+		return nil, false, err
 	}
 	viewOut := strings.Split(sout.String(), "\n")[1]
 	tag := strings.TrimSpace(strings.Split(viewOut, ":")[1])
-	current, err := semver.NewVersion(tag)
+	current, err = semver.NewVersion(tag)
 	if err != nil {
-		return nil, isInitial, fmt.Errorf("invalid version. err: %w", err)
+		return nil, false, fmt.Errorf("invalid version. err: %w", err)
 	}
-	return current, isInitial, nil
+	return current, false, nil
 }
 
 func newVersion(sin io.ReadCloser, sout io.WriteCloser) (*semver.Version, error) {
