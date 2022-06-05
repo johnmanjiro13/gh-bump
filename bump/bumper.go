@@ -3,6 +3,8 @@ package bump
 import (
 	"bytes"
 	"fmt"
+	"io"
+	"os"
 	"strings"
 
 	"github.com/Masterminds/semver/v3"
@@ -107,13 +109,13 @@ func (b *bumper) Bump() error {
 	if isInitial {
 		nextVer = current
 	} else {
-		nextVer, err = nextVersion(current)
+		nextVer, err = nextVersion(current, os.Stdin, os.Stdout)
 		if err != nil {
 			return err
 		}
 	}
 
-	ok, err := approve(nextVer)
+	ok, err := approve(nextVer, os.Stdin, os.Stdout)
 	if err != nil {
 		return err
 	}
@@ -192,10 +194,12 @@ func newVersion() (*semver.Version, error) {
 	return semver.NewVersion(result)
 }
 
-func nextVersion(current *semver.Version) (*semver.Version, error) {
+func nextVersion(current *semver.Version, sin io.ReadCloser, sout io.WriteCloser) (*semver.Version, error) {
 	prompt := promptui.Select{
-		Label: fmt.Sprintf("Select next version. current: %s", current.Original()),
-		Items: []string{"patch", "minor", "major"},
+		Label:  fmt.Sprintf("Select next version. current: %s", current.Original()),
+		Items:  []string{"patch", "minor", "major"},
+		Stdin:  sin,
+		Stdout: sout,
 	}
 	_, bumpType, err := prompt.Run()
 	if err != nil {
@@ -220,7 +224,7 @@ func incrementVersion(current *semver.Version, bumpType string) (*semver.Version
 	return &next, nil
 }
 
-func approve(next *semver.Version) (bool, error) {
+func approve(next *semver.Version, sin io.ReadCloser, sout io.WriteCloser) (bool, error) {
 	validate := func(input string) error {
 		if input != "y" && input != "yes" && input != "n" && input != "no" {
 			return fmt.Errorf("invalid character. press y/n")
@@ -230,6 +234,8 @@ func approve(next *semver.Version) (bool, error) {
 	prompt := promptui.Prompt{
 		Label:    fmt.Sprintf("Create release %s ? [y/n]", next.Original()),
 		Validate: validate,
+		Stdin:    sin,
+		Stdout:   sout,
 	}
 	result, err := prompt.Run()
 	if err != nil {
