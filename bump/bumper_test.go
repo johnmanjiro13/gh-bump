@@ -12,7 +12,7 @@ import (
 	"github.com/stretchr/testify/assert"
 
 	"github.com/johnmanjiro13/gh-bump/bump"
-	"github.com/johnmanjiro13/gh-bump/bump/mock_bump"
+	"github.com/johnmanjiro13/gh-bump/mock"
 )
 
 const (
@@ -46,7 +46,7 @@ func TestBumper_WithRepository(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 
-	gh := mock_bump.NewMockGh(ctrl)
+	gh := mock.NewMockGh(ctrl)
 	gh.EXPECT().ViewRepository().Return(bytes.NewBufferString(repoDocs), nil, nil)
 
 	for name, tt := range tests {
@@ -64,7 +64,7 @@ func TestBumper_WithDraft(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 
-	gh := mock_bump.NewMockGh(ctrl)
+	gh := mock.NewMockGh(ctrl)
 	b := bump.New(gh)
 	b.WithDraft()
 
@@ -75,7 +75,7 @@ func TestBumper_WithPrerelease(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 
-	gh := mock_bump.NewMockGh(ctrl)
+	gh := mock.NewMockGh(ctrl)
 	b := bump.New(gh)
 	b.WithPrerelease()
 
@@ -86,7 +86,7 @@ func TestBumper_WithDiscussionCategory(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 
-	gh := mock_bump.NewMockGh(ctrl)
+	gh := mock.NewMockGh(ctrl)
 	b := bump.New(gh)
 	b.WithDiscussionCategory("test")
 
@@ -97,7 +97,7 @@ func TestBumper_WithGenerateNotes(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 
-	gh := mock_bump.NewMockGh(ctrl)
+	gh := mock.NewMockGh(ctrl)
 	b := bump.New(gh)
 	b.WithGenerateNotes()
 
@@ -108,7 +108,7 @@ func TestBumper_WithNotes(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 
-	gh := mock_bump.NewMockGh(ctrl)
+	gh := mock.NewMockGh(ctrl)
 	b := bump.New(gh)
 	b.WithNotes("note")
 
@@ -119,7 +119,7 @@ func TestBumper_WithNotesFile(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 
-	gh := mock_bump.NewMockGh(ctrl)
+	gh := mock.NewMockGh(ctrl)
 	b := bump.New(gh)
 	b.WithNotesFile("filename")
 
@@ -130,7 +130,7 @@ func TestBumper_WithTarget(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 
-	gh := mock_bump.NewMockGh(ctrl)
+	gh := mock.NewMockGh(ctrl)
 	b := bump.New(gh)
 	b.WithTarget("target")
 
@@ -141,7 +141,7 @@ func TestBumper_WithTitle(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 
-	gh := mock_bump.NewMockGh(ctrl)
+	gh := mock.NewMockGh(ctrl)
 	b := bump.New(gh)
 	b.WithTitle("title")
 
@@ -152,7 +152,7 @@ func TestBumper_WithBumpType(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 
-	gh := mock_bump.NewMockGh(ctrl)
+	gh := mock.NewMockGh(ctrl)
 	tests := map[string]struct {
 		s       string
 		want    bump.BumpType
@@ -184,7 +184,7 @@ func TestBumper_WithYes(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 
-	gh := mock_bump.NewMockGh(ctrl)
+	gh := mock.NewMockGh(ctrl)
 	b := bump.New(gh)
 	b.WithYes()
 	assert.True(t, b.Yes())
@@ -194,7 +194,7 @@ func TestBumper_ResolveRepository(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 
-	gh := mock_bump.NewMockGh(ctrl)
+	gh := mock.NewMockGh(ctrl)
 	gh.EXPECT().ViewRepository().Return(bytes.NewBufferString(repoDocs), nil, nil)
 
 	b := bump.New(gh)
@@ -207,7 +207,7 @@ func TestBumper_listReleases(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 
-	gh := mock_bump.NewMockGh(ctrl)
+	gh := mock.NewMockGh(ctrl)
 	b := bump.New(gh)
 	gh.EXPECT().ListRelease(b.Repository(), b.IsCurrent()).
 		Return(bytes.NewBufferString(tagList), nil, nil)
@@ -221,7 +221,7 @@ func TestBumper_currentVersion(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 
-	gh := mock_bump.NewMockGh(ctrl)
+	gh := mock.NewMockGh(ctrl)
 	b := bump.New(gh)
 
 	t.Run("new version", func(t *testing.T) {
@@ -335,7 +335,7 @@ func TestBumper_createRelease(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 
-	gh := mock_bump.NewMockGh(ctrl)
+	gh := mock.NewMockGh(ctrl)
 	b := bump.New(gh)
 
 	const version = "v1.0.0"
