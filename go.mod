@@ -7,7 +7,7 @@ require (
 	github.com/cli/safeexec v1.0.0
 	github.com/golang/mock v1.6.0
 	github.com/manifoldco/promptui v0.9.0
-	github.com/spf13/cobra v1.4.0
+	github.com/spf13/cobra v1.5.0
 	github.com/stretchr/testify v1.7.5
 )
 
