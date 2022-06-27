@@ -8,6 +8,13 @@ import (
 	"github.com/johnmanjiro13/gh-bump/gh"
 )
 
+const (
+	// exitStatusOK is status code zero
+	exitStatusOK int = iota
+	// exitStatusError is status code non-zero
+	exitStatusError
+)
+
 func main() {
 	os.Exit(run())
 }
@@ -17,7 +24,7 @@ func run() int {
 	bumper := bump.New(ghCLI)
 	rootCmd := cmd.New(bumper)
 	if err := rootCmd.Execute(); err != nil {
-		return 1
+		return exitStatusError
 	}
-	return 0
+	return exitStatusOK
 }
