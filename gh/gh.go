@@ -2,43 +2,41 @@ package gh
 
 import (
 	"bytes"
-	"fmt"
-	"os/exec"
 
-	"github.com/cli/safeexec"
+	"github.com/cli/go-gh"
 
 	"github.com/johnmanjiro13/gh-bump/bump"
 )
 
-type gh struct{}
+type ghCLI struct{}
 
-func New() *gh {
-	return &gh{}
+func New() *ghCLI {
+	return &ghCLI{}
 }
 
-func (g *gh) ViewRepository() (sout, eout *bytes.Buffer, err error) {
-	return runGh("repo", "view")
+func (g *ghCLI) ViewRepository() (sout, eout bytes.Buffer, err error) {
+	return gh.Exec("repo", "view")
 }
 
-func (g *gh) ListRelease(repo string, isCurrent bool) (sout, eout *bytes.Buffer, err error) {
+func (g *ghCLI) ListRelease(repo string, isCurrent bool) (sout, eout bytes.Buffer, err error) {
 	if isCurrent {
-		sout, eout, err = runGh("release", "list")
+		sout, eout, err = gh.Exec("release", "list")
 	} else {
-		sout, eout, err = runGh("release", "list", "-R", repo)
+		sout, eout, err = gh.Exec("release", "list", "-R", repo)
 	}
 	return
 }
 
-func (g *gh) ViewRelease(repo string, isCurrent bool) (sout, eout *bytes.Buffer, err error) {
+func (g *ghCLI) ViewRelease(repo string, isCurrent bool) (sout, eout bytes.Buffer, err error) {
 	if isCurrent {
-		sout, eout, err = runGh("release", "view")
+		sout, eout, err = gh.Exec("release", "view")
 	} else {
-		sout, eout, err = runGh("release", "view", "-R", repo)
+		sout, eout, err = gh.Exec("release", "view", "-R", repo)
 	}
 	return
 }
 
-func (g *gh) CreateRelease(version string, repo string, isCurrent bool, option *bump.ReleaseOption) (sout, eout *bytes.Buffer, err error) {
+func (g *ghCLI) CreateRelease(version string, repo string, isCurrent bool, option *bump.ReleaseOption) (sout, eout bytes.Buffer, err error) {
 	args := []string{"release", "create", version}
 	if !isCurrent {
 		args = append(args, []string{"-R", repo}...)
@@ -67,27 +65,6 @@ func (g *gh) CreateRelease(version string, repo string, isCurrent bool, option *
 	if option.Title != "" {
 		args = append(args, []string{"-t", option.Title}...)
 	}
-	sout, eout, err = runGh(args...)
-	return
-}
-
-func runGh(args ...string) (sout, eout *bytes.Buffer, err error) {
-	sout = new(bytes.Buffer)
-	eout = new(bytes.Buffer)
-	ghBin, err := safeexec.LookPath("gh")
-	if err != nil {
-		err = fmt.Errorf("could not find gh. err: %w", err)
-		return
-	}
-
-	cmd := exec.Command(ghBin, args...)
-	cmd.Stdout = sout
-	cmd.Stderr = eout
-
-	err = cmd.Run()
-	if err != nil {
-		err = fmt.Errorf("failed to run gh. err: %w, eout: %s", err, eout.String())
-		return
-	}
+	sout, eout, err = gh.Exec(args...)
 	return
 }
