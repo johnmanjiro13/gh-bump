@@ -36,11 +36,11 @@ func (m *MockGh) EXPECT() *MockGhMockRecorder {
 }
 
 // CreateRelease mocks base method.
-func (m *MockGh) CreateRelease(arg0, arg1 string, arg2 bool, arg3 *bump.ReleaseOption) (*bytes.Buffer, *bytes.Buffer, error) {
+func (m *MockGh) CreateRelease(arg0, arg1 string, arg2 bool, arg3 *bump.ReleaseOption) (bytes.Buffer, bytes.Buffer, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "CreateRelease", arg0, arg1, arg2, arg3)
-	ret0, _ := ret[0].(*bytes.Buffer)
-	ret1, _ := ret[1].(*bytes.Buffer)
+	ret0, _ := ret[0].(bytes.Buffer)
+	ret1, _ := ret[1].(bytes.Buffer)
 	ret2, _ := ret[2].(error)
 	return ret0, ret1, ret2
 }
@@ -52,11 +52,11 @@ func (mr *MockGhMockRecorder) CreateRelease(arg0, arg1, arg2, arg3 interface{}) 
 }
 
 // ListRelease mocks base method.
-func (m *MockGh) ListRelease(arg0 string, arg1 bool) (*bytes.Buffer, *bytes.Buffer, error) {
+func (m *MockGh) ListRelease(arg0 string, arg1 bool) (bytes.Buffer, bytes.Buffer, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "ListRelease", arg0, arg1)
-	ret0, _ := ret[0].(*bytes.Buffer)
-	ret1, _ := ret[1].(*bytes.Buffer)
+	ret0, _ := ret[0].(bytes.Buffer)
+	ret1, _ := ret[1].(bytes.Buffer)
 	ret2, _ := ret[2].(error)
 	return ret0, ret1, ret2
 }
@@ -68,11 +68,11 @@ func (mr *MockGhMockRecorder) ListRelease(arg0, arg1 interface{}) *gomock.Call {
 }
 
 // ViewRelease mocks base method.
-func (m *MockGh) ViewRelease(arg0 string, arg1 bool) (*bytes.Buffer, *bytes.Buffer, error) {
+func (m *MockGh) ViewRelease(arg0 string, arg1 bool) (bytes.Buffer, bytes.Buffer, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "ViewRelease", arg0, arg1)
-	ret0, _ := ret[0].(*bytes.Buffer)
-	ret1, _ := ret[1].(*bytes.Buffer)
+	ret0, _ := ret[0].(bytes.Buffer)
+	ret1, _ := ret[1].(bytes.Buffer)
 	ret2, _ := ret[2].(error)
 	return ret0, ret1, ret2
 }
@@ -84,11 +84,11 @@ func (mr *MockGhMockRecorder) ViewRelease(arg0, arg1 interface{}) *gomock.Call {
 }
 
 // ViewRepository mocks base method.
-func (m *MockGh) ViewRepository() (*bytes.Buffer, *bytes.Buffer, error) {
+func (m *MockGh) ViewRepository() (bytes.Buffer, bytes.Buffer, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "ViewRepository")
-	ret0, _ := ret[0].(*bytes.Buffer)
-	ret1, _ := ret[1].(*bytes.Buffer)
+	ret0, _ := ret[0].(bytes.Buffer)
+	ret1, _ := ret[1].(bytes.Buffer)
 	ret2, _ := ret[2].(error)
 	return ret0, ret1, ret2
 }
