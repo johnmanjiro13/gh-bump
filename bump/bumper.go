@@ -11,6 +11,7 @@ import (
 	"github.com/manifoldco/promptui"
 )
 
+//go:generate mockgen -source=$GOFILE -package=mock -destination=../mock/mock_${GOPACKAGE}.go
 type Gh interface {
 	ViewRepository() (sout, eout bytes.Buffer, err error)
 	ListRelease(repo string, isCurrent bool) (sout, eout bytes.Buffer, err error)
