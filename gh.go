@@ -1,16 +1,14 @@
-package gh
+package bump
 
 import (
 	"bytes"
 
 	"github.com/cli/go-gh"
-
-	"github.com/johnmanjiro13/gh-bump/bump"
 )
 
 type ghCLI struct{}
 
-func New() *ghCLI {
+func NewGh() *ghCLI {
 	return &ghCLI{}
 }
 
@@ -36,7 +34,7 @@ func (g *ghCLI) ViewRelease(repo string, isCurrent bool) (sout, eout bytes.Buffe
 	return
 }
 
-func (g *ghCLI) CreateRelease(version string, repo string, isCurrent bool, option *bump.ReleaseOption) (sout, eout bytes.Buffer, err error) {
+func (g *ghCLI) CreateRelease(version string, repo string, isCurrent bool, option *ReleaseOption) (sout, eout bytes.Buffer, err error) {
 	args := []string{"release", "create", version}
 	if !isCurrent {
 		args = append(args, []string{"-R", repo}...)

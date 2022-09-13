@@ -11,7 +11,7 @@ import (
 	"github.com/golang/mock/gomock"
 	"github.com/stretchr/testify/assert"
 
-	"github.com/johnmanjiro13/gh-bump/bump"
+	bump "github.com/johnmanjiro13/gh-bump"
 	"github.com/johnmanjiro13/gh-bump/mock"
 )
 
@@ -51,7 +51,7 @@ func TestBumper_WithRepository(t *testing.T) {
 
 	for name, tt := range tests {
 		t.Run(name, func(t *testing.T) {
-			b := bump.New(gh)
+			b := bump.NewBumper(gh)
 			assert.NoError(t, b.WithRepository(tt.repository))
 
 			assert.Equal(t, tt.wantRepository, b.Repository())
@@ -65,7 +65,7 @@ func TestBumper_WithDraft(t *testing.T) {
 	defer ctrl.Finish()
 
 	gh := mock.NewMockGh(ctrl)
-	b := bump.New(gh)
+	b := bump.NewBumper(gh)
 	b.WithDraft()
 
 	assert.True(t, b.IsDraft())
@@ -76,7 +76,7 @@ func TestBumper_WithPrerelease(t *testing.T) {
 	defer ctrl.Finish()
 
 	gh := mock.NewMockGh(ctrl)
-	b := bump.New(gh)
+	b := bump.NewBumper(gh)
 	b.WithPrerelease()
 
 	assert.True(t, b.IsPrerelease())
@@ -87,7 +87,7 @@ func TestBumper_WithDiscussionCategory(t *testing.T) {
 	defer ctrl.Finish()
 
 	gh := mock.NewMockGh(ctrl)
-	b := bump.New(gh)
+	b := bump.NewBumper(gh)
 	b.WithDiscussionCategory("test")
 
 	assert.Equal(t, "test", b.DiscussionCategory())
@@ -98,7 +98,7 @@ func TestBumper_WithGenerateNotes(t *testing.T) {
 	defer ctrl.Finish()
 
 	gh := mock.NewMockGh(ctrl)
-	b := bump.New(gh)
+	b := bump.NewBumper(gh)
 	b.WithGenerateNotes()
 
 	assert.True(t, b.GenerateNotes())
@@ -109,7 +109,7 @@ func TestBumper_WithNotes(t *testing.T) {
 	defer ctrl.Finish()
 
 	gh := mock.NewMockGh(ctrl)
-	b := bump.New(gh)
+	b := bump.NewBumper(gh)
 	b.WithNotes("note")
 
 	assert.Equal(t, "note", b.Notes())
@@ -120,7 +120,7 @@ func TestBumper_WithNotesFile(t *testing.T) {
 	defer ctrl.Finish()
 
 	gh := mock.NewMockGh(ctrl)
-	b := bump.New(gh)
+	b := bump.NewBumper(gh)
 	b.WithNotesFile("filename")
 
 	assert.Equal(t, "filename", b.NotesFilename())
@@ -131,7 +131,7 @@ func TestBumper_WithTarget(t *testing.T) {
 	defer ctrl.Finish()
 
 	gh := mock.NewMockGh(ctrl)
-	b := bump.New(gh)
+	b := bump.NewBumper(gh)
 	b.WithTarget("target")
 
 	assert.Equal(t, "target", b.Target())
@@ -142,7 +142,7 @@ func TestBumper_WithTitle(t *testing.T) {
 	defer ctrl.Finish()
 
 	gh := mock.NewMockGh(ctrl)
-	b := bump.New(gh)
+	b := bump.NewBumper(gh)
 	b.WithTitle("title")
 
 	assert.Equal(t, "title", b.Title())
@@ -172,7 +172,7 @@ func TestBumper_WithBumpType(t *testing.T) {
 
 	for name, tt := range tests {
 		t.Run(name, func(t *testing.T) {
-			b := bump.New(gh)
+			b := bump.NewBumper(gh)
 			err := b.WithBumpType(tt.s)
 			assert.Equal(t, tt.want, b.BumpType())
 			assert.Equal(t, tt.wantErr, err)
@@ -185,7 +185,7 @@ func TestBumper_WithYes(t *testing.T) {
 	defer ctrl.Finish()
 
 	gh := mock.NewMockGh(ctrl)
-	b := bump.New(gh)
+	b := bump.NewBumper(gh)
 	b.WithYes()
 	assert.True(t, b.Yes())
 }
@@ -197,7 +197,7 @@ func TestBumper_ResolveRepository(t *testing.T) {
 	gh := mock.NewMockGh(ctrl)
 	gh.EXPECT().ViewRepository().Return(*bytes.NewBufferString(repoDocs), bytes.Buffer{}, nil)
 
-	b := bump.New(gh)
+	b := bump.NewBumper(gh)
 	got, err := bump.ResolveRepository(b)
 	assert.NoError(t, err)
 	assert.Equal(t, "johnmanjiro13/gh-bump", got)
@@ -208,7 +208,7 @@ func TestBumper_listReleases(t *testing.T) {
 	defer ctrl.Finish()
 
 	gh := mock.NewMockGh(ctrl)
-	b := bump.New(gh)
+	b := bump.NewBumper(gh)
 	gh.EXPECT().ListRelease(b.Repository(), b.IsCurrent()).
 		Return(*bytes.NewBufferString(tagList), bytes.Buffer{}, nil)
 
@@ -222,7 +222,7 @@ func TestBumper_currentVersion(t *testing.T) {
 	defer ctrl.Finish()
 
 	gh := mock.NewMockGh(ctrl)
-	b := bump.New(gh)
+	b := bump.NewBumper(gh)
 
 	t.Run("new version", func(t *testing.T) {
 		gh.EXPECT().ViewRelease(b.Repository(), b.IsCurrent()).
@@ -336,7 +336,7 @@ func TestBumper_createRelease(t *testing.T) {
 	defer ctrl.Finish()
 
 	gh := mock.NewMockGh(ctrl)
-	b := bump.New(gh)
+	b := bump.NewBumper(gh)
 
 	const version = "v1.0.0"
 	gh.EXPECT().CreateRelease(version, b.Repository(), b.IsCurrent(), &bump.ReleaseOption{}).

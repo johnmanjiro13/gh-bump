@@ -1,8 +1,6 @@
-package cmd
+package bump
 
-import (
-	"github.com/spf13/cobra"
-)
+import "github.com/spf13/cobra"
 
 type Bumper interface {
 	Bump() error
@@ -19,7 +17,7 @@ type Bumper interface {
 	WithYes()
 }
 
-func New(bumper Bumper) *cobra.Command {
+func NewRootCmd(bumper Bumper) *cobra.Command {
 	var (
 		repository         string
 		isDraft            bool
