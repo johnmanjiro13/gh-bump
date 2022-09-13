@@ -9,7 +9,7 @@ import (
 	reflect "reflect"
 
 	gomock "github.com/golang/mock/gomock"
-	bump "github.com/johnmanjiro13/gh-bump/bump"
+	bump "github.com/johnmanjiro13/gh-bump"
 )
 
 // MockGh is a mock of Gh interface.

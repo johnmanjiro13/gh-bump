@@ -6,7 +6,7 @@ import (
 
 	"github.com/stretchr/testify/assert"
 
-	"github.com/johnmanjiro13/gh-bump/bump"
+	bump "github.com/johnmanjiro13/gh-bump"
 )
 
 func TestBumpType_String(t *testing.T) {

@@ -1,4 +1,4 @@
-package cmd
+package bump_test
 
 import (
 	"strings"
@@ -6,7 +6,7 @@ import (
 
 	"github.com/stretchr/testify/assert"
 
-	"github.com/johnmanjiro13/gh-bump/bump"
+	bump "github.com/johnmanjiro13/gh-bump"
 )
 
 type mockBumper struct {
@@ -145,7 +145,7 @@ func TestNew(t *testing.T) {
 	for name, tt := range tests {
 		t.Run(name, func(t *testing.T) {
 			bumper := &mockBumper{}
-			cmd := New(bumper)
+			cmd := bump.NewRootCmd(bumper)
 			cmd.SetArgs(strings.Split(tt.command, " ")[1:])
 
 			assert.NoError(t, cmd.Execute())

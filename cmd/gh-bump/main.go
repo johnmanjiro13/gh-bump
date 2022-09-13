@@ -3,9 +3,7 @@ package main
 import (
 	"os"
 
-	"github.com/johnmanjiro13/gh-bump/bump"
-	"github.com/johnmanjiro13/gh-bump/cmd"
-	"github.com/johnmanjiro13/gh-bump/gh"
+	bump "github.com/johnmanjiro13/gh-bump"
 )
 
 type exitCode int
@@ -22,9 +20,9 @@ func main() {
 }
 
 func run() exitCode {
-	ghCLI := gh.New()
-	bumper := bump.New(ghCLI)
-	rootCmd := cmd.New(bumper)
+	gh := bump.NewGh()
+	bumper := bump.NewBumper(gh)
+	rootCmd := bump.NewRootCmd(bumper)
 	if err := rootCmd.Execute(); err != nil {
 		return exitStatusError
 	}
