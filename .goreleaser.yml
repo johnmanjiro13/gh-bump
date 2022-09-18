@@ -17,6 +17,7 @@ builds:
         goarch: 386
       - goos: windows
         goarch: arm64
+    main: ./cmd/gh-bump
 archives:
   - name_template: '{{ .Os }}-{{ .Arch }}'
     format: binary
