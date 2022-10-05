@@ -1,11 +1,11 @@
-name: build
+name: test
 on:
   pull_request:
   push:
     branches:
       - main
 jobs:
-  build:
+  test:
     strategy:
       matrix:
         os: [ubuntu-latest, macOS-latest, windows-latest]
