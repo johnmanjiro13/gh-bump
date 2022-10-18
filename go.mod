@@ -4,7 +4,7 @@ go 1.19
 
 require (
 	github.com/Masterminds/semver/v3 v3.1.1
-	github.com/cli/go-gh v0.1.1
+	github.com/cli/go-gh v0.1.2
 	github.com/golang/mock v1.6.0
 	github.com/manifoldco/promptui v0.9.0
 	github.com/spf13/cobra v1.5.0
