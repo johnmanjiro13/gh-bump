@@ -1,5 +1,10 @@
 # Changelog
 
+## [v0.6.6](https://github.com/johnmanjiro13/gh-bump/compare/v0.6.5...v0.6.6) - 2022-11-13
+- build(deps): bump github.com/stretchr/testify from 1.8.0 to 1.8.1 by @dependabot in https://github.com/johnmanjiro13/gh-bump/pull/61
+- build(deps): bump github.com/spf13/cobra from 1.5.0 to 1.6.1 by @dependabot in https://github.com/johnmanjiro13/gh-bump/pull/63
+- build(deps): bump github.com/cli/go-gh from 0.1.1 to 0.1.2 by @dependabot in https://github.com/johnmanjiro13/gh-bump/pull/60
+
 ## [v0.6.5](https://github.com/johnmanjiro13/gh-bump/compare/v0.6.4...v0.6.5) - 2022-10-05
 - build(deps): bump github.com/cli/go-gh from 0.1.0 to 0.1.1 by @dependabot in https://github.com/johnmanjiro13/gh-bump/pull/55
 - ci: Introduce tagpr by @johnmanjiro13 in https://github.com/johnmanjiro13/gh-bump/pull/56
