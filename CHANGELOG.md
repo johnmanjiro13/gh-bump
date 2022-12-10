@@ -1,5 +1,15 @@
 # Changelog
 
+## [v0.7.0](https://github.com/johnmanjiro13/gh-bump/compare/v0.6.6...v0.7.0) - 2022-12-10
+- chore: Disable dependabot by @johnmanjiro13 in https://github.com/johnmanjiro13/gh-bump/pull/66
+- Configure Renovate by @renovate in https://github.com/johnmanjiro13/gh-bump/pull/68
+- chore: Setup renovate by @johnmanjiro13 in https://github.com/johnmanjiro13/gh-bump/pull/72
+- chore(deps): update codecov/codecov-action action to v3 by @renovate in https://github.com/johnmanjiro13/gh-bump/pull/70
+- remove: CODEOWNERS by @johnmanjiro13 in https://github.com/johnmanjiro13/gh-bump/pull/74
+- fix(deps): update module github.com/cli/go-gh to v1 by @renovate in https://github.com/johnmanjiro13/gh-bump/pull/73
+- fix(deps): update module github.com/masterminds/semver/v3 to v3.2.0 by @renovate in https://github.com/johnmanjiro13/gh-bump/pull/69
+- refactor: reviewdog yaml by @johnmanjiro13 in https://github.com/johnmanjiro13/gh-bump/pull/75
+
 ## [v0.6.6](https://github.com/johnmanjiro13/gh-bump/compare/v0.6.5...v0.6.6) - 2022-11-13
 - build(deps): bump github.com/stretchr/testify from 1.8.0 to 1.8.1 by @dependabot in https://github.com/johnmanjiro13/gh-bump/pull/61
 - build(deps): bump github.com/spf13/cobra from 1.5.0 to 1.6.1 by @dependabot in https://github.com/johnmanjiro13/gh-bump/pull/63
