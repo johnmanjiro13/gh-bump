@@ -1,6 +1,23 @@
 {
   "$schema": "https://docs.renovatebot.com/renovate-schema.json",
   "extends": [
-    "config:base"
+    "config:base",
+    ":preserveSemverRanges",
+    ":timezone(Asia/Tokyo)"
+  ],
+  "schedule": [
+    "every weekend"
+  ],
+  "labels": [
+    "dependencies"
+  ],
+  "constraints": {
+    "go": "1.19"
+  },
+  "packageRules": [
+    {
+      "matchUpdateTypes": ["minor", "patch", "pin", "digest"],
+      "automerge": true
+    }
   ]
 }
