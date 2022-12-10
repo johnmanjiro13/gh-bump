@@ -30,4 +30,4 @@ jobs:
         # We would like to use -race option but promptui has a data race bug, so we don't use it.
         run: go test -v -coverprofile="coverage.txt" -covermode=atomic ./...
       - name: upload coverage to codecov
-        uses: codecov/codecov-action@v2
+        uses: codecov/codecov-action@v3
