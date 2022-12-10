@@ -1,5 +1,5 @@
 name: reviewdog
-on: [pull_request]
+on: pull_request
 jobs:
   staticcheck:
     name: staticcheck
@@ -8,6 +8,5 @@ jobs:
       - uses: actions/checkout@v3
       - uses: reviewdog/action-staticcheck@v1
         with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
           reporter: github-pr-review
           fail_on_error: true
