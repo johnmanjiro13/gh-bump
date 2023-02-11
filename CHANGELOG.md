@@ -1,5 +1,9 @@
 # Changelog
 
+## [v0.7.1](https://github.com/johnmanjiro13/gh-bump/compare/v0.7.0...v0.7.1) - 2023-02-11
+- chore(deps): update goreleaser/goreleaser-action action to v4 by @renovate in https://github.com/johnmanjiro13/gh-bump/pull/76
+- fix(deps): update module github.com/cli/go-gh to v1.1.0 by @renovate in https://github.com/johnmanjiro13/gh-bump/pull/78
+
 ## [v0.7.0](https://github.com/johnmanjiro13/gh-bump/compare/v0.6.6...v0.7.0) - 2022-12-10
 - chore: Disable dependabot by @johnmanjiro13 in https://github.com/johnmanjiro13/gh-bump/pull/66
 - Configure Renovate by @renovate in https://github.com/johnmanjiro13/gh-bump/pull/68
