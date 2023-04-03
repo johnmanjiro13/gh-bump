@@ -47,7 +47,7 @@ func TestBumper_WithRepository(t *testing.T) {
 	defer ctrl.Finish()
 
 	gh := mock.NewMockGh(ctrl)
-	gh.EXPECT().ViewRepository().Return(*bytes.NewBufferString(repoDocs), bytes.Buffer{}, nil)
+	gh.EXPECT().ViewRepository().Return(bytes.NewBufferString(repoDocs), nil, nil)
 
 	for name, tt := range tests {
 		t.Run(name, func(t *testing.T) {
@@ -195,7 +195,7 @@ func TestBumper_ResolveRepository(t *testing.T) {
 	defer ctrl.Finish()
 
 	gh := mock.NewMockGh(ctrl)
-	gh.EXPECT().ViewRepository().Return(*bytes.NewBufferString(repoDocs), bytes.Buffer{}, nil)
+	gh.EXPECT().ViewRepository().Return(bytes.NewBufferString(repoDocs), nil, nil)
 
 	b := bump.NewBumper(gh)
 	got, err := bump.ResolveRepository(b)
@@ -210,7 +210,7 @@ func TestBumper_listReleases(t *testing.T) {
 	gh := mock.NewMockGh(ctrl)
 	b := bump.NewBumper(gh)
 	gh.EXPECT().ListRelease(b.Repository(), b.IsCurrent()).
-		Return(*bytes.NewBufferString(tagList), bytes.Buffer{}, nil)
+		Return(bytes.NewBufferString(tagList), nil, nil)
 
 	got, err := bump.ListReleases(b)
 	assert.NoError(t, err)
@@ -226,7 +226,7 @@ func TestBumper_currentVersion(t *testing.T) {
 
 	t.Run("new version", func(t *testing.T) {
 		gh.EXPECT().ViewRelease(b.Repository(), b.IsCurrent()).
-			Return(*bytes.NewBufferString(releaseView), bytes.Buffer{}, nil)
+			Return(bytes.NewBufferString(releaseView), nil, nil)
 
 		got, isInitial, err := bump.CurrentVersion(b)
 		assert.NoError(t, err)
@@ -340,7 +340,7 @@ func TestBumper_createRelease(t *testing.T) {
 
 	const version = "v1.0.0"
 	gh.EXPECT().CreateRelease(version, b.Repository(), b.IsCurrent(), &bump.ReleaseOption{}).
-		Return(*bytes.NewBufferString(version), bytes.Buffer{}, nil)
+		Return(bytes.NewBufferString(version), nil, nil)
 
 	got, err := bump.CreateRelease(b, version)
 	assert.NoError(t, err)
