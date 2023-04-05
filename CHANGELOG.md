@@ -1,5 +1,13 @@
 # Changelog
 
+## [v0.7.2](https://github.com/johnmanjiro13/gh-bump/compare/v0.7.1...v0.7.2) - 2023-04-05
+- fix(deps): update module github.com/cli/go-gh to v1.2.0 by @renovate in https://github.com/johnmanjiro13/gh-bump/pull/79
+- fix(deps): update module github.com/stretchr/testify to v1.8.2 by @renovate in https://github.com/johnmanjiro13/gh-bump/pull/81
+- fix(deps): update module github.com/cli/go-gh to v1.2.1 by @renovate in https://github.com/johnmanjiro13/gh-bump/pull/82
+- feat: Use safeexec instead of go-gh by @johnmanjiro13 in https://github.com/johnmanjiro13/gh-bump/pull/85
+- chore(deps): update actions/setup-go action to v4 by @renovate in https://github.com/johnmanjiro13/gh-bump/pull/84
+- chore:  Set go version of the ci with go.mod by @johnmanjiro13 in https://github.com/johnmanjiro13/gh-bump/pull/86
+
 ## [v0.7.1](https://github.com/johnmanjiro13/gh-bump/compare/v0.7.0...v0.7.1) - 2023-02-11
 - chore(deps): update goreleaser/goreleaser-action action to v4 by @renovate in https://github.com/johnmanjiro13/gh-bump/pull/76
 - fix(deps): update module github.com/cli/go-gh to v1.1.0 by @renovate in https://github.com/johnmanjiro13/gh-bump/pull/78
