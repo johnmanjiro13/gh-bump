@@ -13,10 +13,10 @@ import (
 
 //go:generate mockgen -source=$GOFILE -package=mock -destination=./mock/mock_${GOPACKAGE}.go
 type Gh interface {
-	ViewRepository() (sout, eout bytes.Buffer, err error)
-	ListRelease(repo string, isCurrent bool) (sout, eout bytes.Buffer, err error)
-	ViewRelease(repo string, isCurrent bool) (sout, eout bytes.Buffer, err error)
-	CreateRelease(version string, repo string, isCurrent bool, option *ReleaseOption) (sout, eout bytes.Buffer, err error)
+	ViewRepository() (sout, eout *bytes.Buffer, err error)
+	ListRelease(repo string, isCurrent bool) (sout, eout *bytes.Buffer, err error)
+	ViewRelease(repo string, isCurrent bool) (sout, eout *bytes.Buffer, err error)
+	CreateRelease(version string, repo string, isCurrent bool, option *ReleaseOption) (sout, eout *bytes.Buffer, err error)
 }
 
 type ReleaseOption struct {
