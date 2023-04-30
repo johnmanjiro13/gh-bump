@@ -178,7 +178,7 @@ func (b *bumper) listReleases() (string, error) {
 func (b *bumper) currentVersion() (current *semver.Version, isInitial bool, err error) {
 	sout, eout, err := b.gh.ViewRelease(b.repository, b.isCurrent)
 	if err != nil {
-		if strings.Contains(eout.String(), "HTTP 404: Not Found") {
+		if strings.Contains(eout.String(), "release not found") {
 			current, err = newVersion(os.Stdin, os.Stdout)
 			if err != nil {
 				return nil, false, err
