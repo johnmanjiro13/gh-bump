@@ -3,12 +3,10 @@ package bump
 import (
 	"bytes"
 	"fmt"
-	"io"
-	"os"
 	"strings"
 
+	"github.com/AlecAivazis/survey/v2"
 	"github.com/Masterminds/semver/v3"
-	"github.com/manifoldco/promptui"
 )
 
 //go:generate mockgen -source=$GOFILE -package=mock -destination=./mock/mock_${GOPACKAGE}.go
@@ -130,7 +128,7 @@ func (b *bumper) Bump() error {
 			return err
 		}
 	} else {
-		nextVer, err = nextVersion(current, os.Stdin, os.Stdout)
+		nextVer, err = nextVersion(current)
 		if err != nil {
 			return err
 		}
@@ -138,7 +136,7 @@ func (b *bumper) Bump() error {
 
 	// Skip approval if --yes is set
 	if !b.yes {
-		ok, err := approve(nextVer, os.Stdin, os.Stdout)
+		ok, err := approve(nextVer)
 		if err != nil {
 			return err
 		}
@@ -179,7 +177,7 @@ func (b *bumper) currentVersion() (current *semver.Version, isInitial bool, err 
 	sout, eout, err := b.gh.ViewRelease(b.repository, b.isCurrent)
 	if err != nil {
 		if strings.Contains(eout.String(), "release not found") {
-			current, err = newVersion(os.Stdin, os.Stdout)
+			current, err = newVersion()
 			if err != nil {
 				return nil, false, err
 			}
@@ -196,8 +194,12 @@ func (b *bumper) currentVersion() (current *semver.Version, isInitial bool, err 
 	return current, false, nil
 }
 
-func newVersion(sin io.ReadCloser, sout io.WriteCloser) (*semver.Version, error) {
-	validate := func(input string) error {
+func newVersion() (*semver.Version, error) {
+	validate := func(v interface{}) error {
+		input, ok := v.(string)
+		if !ok {
+			return fmt.Errorf("invalid input type. input: %v", v)
+		}
 		_, err := semver.NewVersion(input)
 		if err != nil {
 			return fmt.Errorf("invalid version. err: %w", err)
@@ -205,31 +207,25 @@ func newVersion(sin io.ReadCloser, sout io.WriteCloser) (*semver.Version, error)
 		return nil
 	}
 
-	prompt := promptui.Prompt{
-		Label:    "New version",
-		Validate: validate,
-		Stdin:    sin,
-		Stdout:   sout,
+	prompt := &survey.Input{
+		Message: "New version",
 	}
-	result, err := prompt.Run()
-	if err != nil {
+	var version string
+	if err := survey.AskOne(prompt, &version, survey.WithValidator(validate)); err != nil {
 		return nil, fmt.Errorf("failed to prompt. err: %w", err)
 	}
-	return semver.NewVersion(result)
+	return semver.NewVersion(version)
 }
 
-func nextVersion(current *semver.Version, sin io.ReadCloser, sout io.WriteCloser) (*semver.Version, error) {
-	prompt := promptui.Select{
-		Label:  fmt.Sprintf("Select next version. current: %s", current.Original()),
-		Items:  []string{"patch", "minor", "major"},
-		Stdin:  sin,
-		Stdout: sout,
+func nextVersion(current *semver.Version) (*semver.Version, error) {
+	prompt := &survey.Select{
+		Message: fmt.Sprintf("Select next version. current: %s", current.Original()),
+		Options: []string{"patch", "minor", "major"},
 	}
-	_, bumpType, err := prompt.Run()
-	if err != nil {
+	var bumpType string
+	if err := survey.AskOne(prompt, &bumpType); err != nil {
 		return nil, fmt.Errorf("failed to prompt. err: %w", err)
 	}
-
 	return incrementVersion(current, bumpType)
 }
 
@@ -248,27 +244,15 @@ func incrementVersion(current *semver.Version, bumpType string) (*semver.Version
 	return &next, nil
 }
 
-func approve(next *semver.Version, sin io.ReadCloser, sout io.WriteCloser) (bool, error) {
-	validate := func(input string) error {
-		if input != "y" && input != "yes" && input != "n" && input != "no" {
-			return fmt.Errorf("invalid character. press y/n")
-		}
-		return nil
+func approve(next *semver.Version) (bool, error) {
+	var isApproved bool
+	prompt := &survey.Confirm{
+		Message: fmt.Sprintf("Create release %s ?", next.Original()),
 	}
-	prompt := promptui.Prompt{
-		Label:    fmt.Sprintf("Create release %s ? [y/n]", next.Original()),
-		Validate: validate,
-		Stdin:    sin,
-		Stdout:   sout,
-	}
-	result, err := prompt.Run()
-	if err != nil {
+	if err := survey.AskOne(prompt, &isApproved); err != nil {
 		return false, fmt.Errorf("failed to prompt. err: %w", err)
 	}
-	if result == "y" || result == "yes" {
-		return true, nil
-	}
-	return false, nil
+	return isApproved, nil
 }
 
 func (b *bumper) createRelease(version string) (string, error) {

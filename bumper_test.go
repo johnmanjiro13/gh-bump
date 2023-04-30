@@ -3,8 +3,6 @@ package bump_test
 import (
 	"bytes"
 	"fmt"
-	"io"
-	"strings"
 	"testing"
 
 	"github.com/Masterminds/semver/v3"
@@ -22,8 +20,6 @@ description:    gh extension for bumping version of a repository`
 	releaseView = `title:  v0.1.0
 tag:    v0.1.0`
 )
-
-var arrowDownAndEnter = []byte{14, 10}
 
 func TestBumper_WithRepository(t *testing.T) {
 	tests := map[string]struct {
@@ -234,66 +230,6 @@ func TestBumper_currentVersion(t *testing.T) {
 		want := semver.MustParse("v0.1.0")
 		assert.Equal(t, want, got)
 	})
-}
-
-type mockWriteCloser struct {
-	bytes.Buffer
-}
-
-func (m *mockWriteCloser) Close() error {
-	return nil
-}
-
-func TestNewVersion(t *testing.T) {
-	sin := io.NopCloser(strings.NewReader("v0.1.0\n"))
-	sout := &mockWriteCloser{bytes.Buffer{}}
-	newVer, err := bump.NewVersion(sin, sout)
-	assert.NoError(t, err)
-	assert.Equal(t, semver.MustParse("v0.1.0"), newVer)
-}
-
-func TestNextVersion(t *testing.T) {
-	sin := io.NopCloser(strings.NewReader(string(arrowDownAndEnter)))
-	sout := &mockWriteCloser{bytes.Buffer{}}
-	current := semver.MustParse("v0.1.0")
-	nextVer, err := bump.NextVersion(current, sin, sout)
-	fmt.Println(sout.String())
-	assert.NoError(t, err)
-	assert.Equal(t, semver.MustParse("v0.2.0"), nextVer)
-}
-
-func TestApprove(t *testing.T) {
-	tests := map[string]struct {
-		text string
-		want bool
-	}{
-		"approve with yes": {
-			text: "yes\n",
-			want: true,
-		},
-		"approve with y": {
-			text: "y\n",
-			want: true,
-		},
-		"disapprove with no": {
-			text: "no\n",
-			want: false,
-		},
-		"disapprove with n": {
-			text: "n\n",
-			want: false,
-		},
-	}
-
-	for name, tt := range tests {
-		t.Run(name, func(t *testing.T) {
-			sin := io.NopCloser(strings.NewReader(tt.text))
-			sout := &mockWriteCloser{bytes.Buffer{}}
-			got, err := bump.Approve(semver.MustParse("v0.1.0"), sin, sout)
-			assert.NoError(t, err)
-			assert.Equal(t, tt.want, got)
-		})
-	}
 }
 
 func TestIncrementVersion(t *testing.T) {
