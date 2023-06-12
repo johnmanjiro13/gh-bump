@@ -1,5 +1,12 @@
 # Changelog
 
+## [v0.8.0](https://github.com/johnmanjiro13/gh-bump/compare/v0.7.3...v0.8.0) - 2023-06-12
+- feat: Bump go version to 1.20 by @johnmanjiro13 in https://github.com/johnmanjiro13/gh-bump/pull/90
+- fix: Use new error message by @johnmanjiro13 in https://github.com/johnmanjiro13/gh-bump/pull/93
+- fix(deps): update module github.com/stretchr/testify to v1.8.3 by @renovate in https://github.com/johnmanjiro13/gh-bump/pull/95
+- fix(deps): update module github.com/stretchr/testify to v1.8.4 by @renovate in https://github.com/johnmanjiro13/gh-bump/pull/96
+- feat: Use survey for prompt module by @johnmanjiro13 in https://github.com/johnmanjiro13/gh-bump/pull/94
+
 ## [v0.7.3](https://github.com/johnmanjiro13/gh-bump/compare/v0.7.2...v0.7.3) - 2023-04-14
 - fix(deps): update module github.com/spf13/cobra to v1.7.0 by @renovate in https://github.com/johnmanjiro13/gh-bump/pull/87
 - fix(deps): update module github.com/masterminds/semver/v3 to v3.2.1 by @renovate in https://github.com/johnmanjiro13/gh-bump/pull/89
