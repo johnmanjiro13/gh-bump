@@ -8,6 +8,7 @@ import (
 	bytes "bytes"
 	reflect "reflect"
 
+	survey "github.com/AlecAivazis/survey/v2"
 	gomock "github.com/golang/mock/gomock"
 	bump "github.com/johnmanjiro13/gh-bump"
 )
@@ -97,4 +98,72 @@ func (m *MockGh) ViewRepository() (*bytes.Buffer, *bytes.Buffer, error) {
 func (mr *MockGhMockRecorder) ViewRepository() *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ViewRepository", reflect.TypeOf((*MockGh)(nil).ViewRepository))
+}
+
+// MockPrompter is a mock of Prompter interface.
+type MockPrompter struct {
+	ctrl     *gomock.Controller
+	recorder *MockPrompterMockRecorder
+}
+
+// MockPrompterMockRecorder is the mock recorder for MockPrompter.
+type MockPrompterMockRecorder struct {
+	mock *MockPrompter
+}
+
+// NewMockPrompter creates a new mock instance.
+func NewMockPrompter(ctrl *gomock.Controller) *MockPrompter {
+	mock := &MockPrompter{ctrl: ctrl}
+	mock.recorder = &MockPrompterMockRecorder{mock}
+	return mock
+}
+
+// EXPECT returns an object that allows the caller to indicate expected use.
+func (m *MockPrompter) EXPECT() *MockPrompterMockRecorder {
+	return m.recorder
+}
+
+// Confirm mocks base method.
+func (m *MockPrompter) Confirm(question string) (bool, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "Confirm", question)
+	ret0, _ := ret[0].(bool)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// Confirm indicates an expected call of Confirm.
+func (mr *MockPrompterMockRecorder) Confirm(question interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Confirm", reflect.TypeOf((*MockPrompter)(nil).Confirm), question)
+}
+
+// Input mocks base method.
+func (m *MockPrompter) Input(question string, validator survey.Validator) (string, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "Input", question, validator)
+	ret0, _ := ret[0].(string)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// Input indicates an expected call of Input.
+func (mr *MockPrompterMockRecorder) Input(question, validator interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Input", reflect.TypeOf((*MockPrompter)(nil).Input), question, validator)
+}
+
+// Select mocks base method.
+func (m *MockPrompter) Select(question string, options []string) (string, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "Select", question, options)
+	ret0, _ := ret[0].(string)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// Select indicates an expected call of Select.
+func (mr *MockPrompterMockRecorder) Select(question, options interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Select", reflect.TypeOf((*MockPrompter)(nil).Select), question, options)
 }

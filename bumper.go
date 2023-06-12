@@ -3,12 +3,10 @@ package bump
 import (
 	"bytes"
 	"fmt"
-	"io"
-	"os"
 	"strings"
 
+	"github.com/AlecAivazis/survey/v2"
 	"github.com/Masterminds/semver/v3"
-	"github.com/manifoldco/promptui"
 )
 
 //go:generate mockgen -source=$GOFILE -package=mock -destination=./mock/mock_${GOPACKAGE}.go
@@ -17,6 +15,13 @@ type Gh interface {
 	ListRelease(repo string, isCurrent bool) (sout, eout *bytes.Buffer, err error)
 	ViewRelease(repo string, isCurrent bool) (sout, eout *bytes.Buffer, err error)
 	CreateRelease(version string, repo string, isCurrent bool, option *ReleaseOption) (sout, eout *bytes.Buffer, err error)
+}
+
+//go:generate mockgen -source=$GOFILE -package=mock -destination=./mock/mock_${GOPACKAGE}.go
+type Prompter interface {
+	Input(question string, validator survey.Validator) (string, error)
+	Select(question string, options []string) (string, error)
+	Confirm(question string) (bool, error)
 }
 
 type ReleaseOption struct {
@@ -32,6 +37,7 @@ type ReleaseOption struct {
 
 type bumper struct {
 	gh                 Gh
+	prompter           Prompter
 	repository         string
 	isCurrent          bool
 	isDraft            bool
@@ -47,7 +53,10 @@ type bumper struct {
 }
 
 func NewBumper(gh Gh) *bumper {
-	return &bumper{gh: gh}
+	return &bumper{
+		gh:       gh,
+		prompter: newPrompter(),
+	}
 }
 
 func (b *bumper) WithRepository(repository string) error {
@@ -130,7 +139,7 @@ func (b *bumper) Bump() error {
 			return err
 		}
 	} else {
-		nextVer, err = nextVersion(current, os.Stdin, os.Stdout)
+		nextVer, err = b.nextVersion(current)
 		if err != nil {
 			return err
 		}
@@ -138,7 +147,7 @@ func (b *bumper) Bump() error {
 
 	// Skip approval if --yes is set
 	if !b.yes {
-		ok, err := approve(nextVer, os.Stdin, os.Stdout)
+		ok, err := b.approve(nextVer)
 		if err != nil {
 			return err
 		}
@@ -179,7 +188,7 @@ func (b *bumper) currentVersion() (current *semver.Version, isInitial bool, err 
 	sout, eout, err := b.gh.ViewRelease(b.repository, b.isCurrent)
 	if err != nil {
 		if strings.Contains(eout.String(), "release not found") {
-			current, err = newVersion(os.Stdin, os.Stdout)
+			current, err = b.newVersion()
 			if err != nil {
 				return nil, false, err
 			}
@@ -196,8 +205,12 @@ func (b *bumper) currentVersion() (current *semver.Version, isInitial bool, err 
 	return current, false, nil
 }
 
-func newVersion(sin io.ReadCloser, sout io.WriteCloser) (*semver.Version, error) {
-	validate := func(input string) error {
+func (b *bumper) newVersion() (*semver.Version, error) {
+	validate := func(v interface{}) error {
+		input, ok := v.(string)
+		if !ok {
+			return fmt.Errorf("invalid input type. input: %v", v)
+		}
 		_, err := semver.NewVersion(input)
 		if err != nil {
 			return fmt.Errorf("invalid version. err: %w", err)
@@ -205,31 +218,20 @@ func newVersion(sin io.ReadCloser, sout io.WriteCloser) (*semver.Version, error)
 		return nil
 	}
 
-	prompt := promptui.Prompt{
-		Label:    "New version",
-		Validate: validate,
-		Stdin:    sin,
-		Stdout:   sout,
-	}
-	result, err := prompt.Run()
+	version, err := b.prompter.Input("New version", validate)
 	if err != nil {
 		return nil, fmt.Errorf("failed to prompt. err: %w", err)
 	}
-	return semver.NewVersion(result)
+	return semver.NewVersion(version)
 }
 
-func nextVersion(current *semver.Version, sin io.ReadCloser, sout io.WriteCloser) (*semver.Version, error) {
-	prompt := promptui.Select{
-		Label:  fmt.Sprintf("Select next version. current: %s", current.Original()),
-		Items:  []string{"patch", "minor", "major"},
-		Stdin:  sin,
-		Stdout: sout,
-	}
-	_, bumpType, err := prompt.Run()
+func (b *bumper) nextVersion(current *semver.Version) (*semver.Version, error) {
+	question := fmt.Sprintf("Select next version. current: %s", current.Original())
+	options := []string{"patch", "minor", "major"}
+	bumpType, err := b.prompter.Select(question, options)
 	if err != nil {
 		return nil, fmt.Errorf("failed to prompt. err: %w", err)
 	}
-
 	return incrementVersion(current, bumpType)
 }
 
@@ -248,27 +250,13 @@ func incrementVersion(current *semver.Version, bumpType string) (*semver.Version
 	return &next, nil
 }
 
-func approve(next *semver.Version, sin io.ReadCloser, sout io.WriteCloser) (bool, error) {
-	validate := func(input string) error {
-		if input != "y" && input != "yes" && input != "n" && input != "no" {
-			return fmt.Errorf("invalid character. press y/n")
-		}
-		return nil
-	}
-	prompt := promptui.Prompt{
-		Label:    fmt.Sprintf("Create release %s ? [y/n]", next.Original()),
-		Validate: validate,
-		Stdin:    sin,
-		Stdout:   sout,
-	}
-	result, err := prompt.Run()
+func (b *bumper) approve(next *semver.Version) (bool, error) {
+	question := fmt.Sprintf("Create release %s ?", next.Original())
+	isApproved, err := b.prompter.Confirm(question)
 	if err != nil {
 		return false, fmt.Errorf("failed to prompt. err: %w", err)
 	}
-	if result == "y" || result == "yes" {
-		return true, nil
-	}
-	return false, nil
+	return isApproved, nil
 }
 
 func (b *bumper) createRelease(version string) (string, error) {

@@ -3,8 +3,6 @@ package bump_test
 import (
 	"bytes"
 	"fmt"
-	"io"
-	"strings"
 	"testing"
 
 	"github.com/Masterminds/semver/v3"
@@ -18,12 +16,114 @@ import (
 const (
 	repoDocs = `name:   johnmanjiro13/gh-bump
 description:    gh extension for bumping version of a repository`
-	tagList     = `v0.2.1  Latest  v0.2.1  2021-12-08T04:19:16Z`
+	tagList     = `v0.1.0  Latest  v0.1.0  2021-12-08T04:19:16Z`
 	releaseView = `title:  v0.1.0
 tag:    v0.1.0`
 )
 
-var arrowDownAndEnter = []byte{14, 10}
+func TestBumper_Bump(t *testing.T) {
+	ctrl := gomock.NewController(t)
+	defer ctrl.Finish()
+
+	gh := mock.NewMockGh(ctrl)
+	prompter := mock.NewMockPrompter(ctrl)
+
+	t.Run("bump semver", func(t *testing.T) {
+		tests := map[string]struct {
+			bumpType string
+			next     string
+		}{
+			"patch": {bumpType: "patch", next: "v0.1.1"},
+			"minor": {bumpType: "minor", next: "v0.2.0"},
+			"major": {bumpType: "major", next: "v1.0.0"},
+		}
+
+		for name, tt := range tests {
+			t.Run(name, func(t *testing.T) {
+				bumper := bump.NewBumper(gh)
+				bumper.SetPrompter(prompter)
+				gh.EXPECT().ListRelease(bumper.Repository(), bumper.IsCurrent()).Return(bytes.NewBufferString(tagList), nil, nil)
+				gh.EXPECT().ViewRelease(bumper.Repository(), bumper.IsCurrent()).Return(bytes.NewBufferString(releaseView), nil, nil)
+
+				prompter.EXPECT().Select("Select next version. current: v0.1.0", []string{"patch", "minor", "major"}).Return(tt.bumpType, nil)
+				prompter.EXPECT().Confirm(fmt.Sprintf("Create release %s ?", tt.next)).Return(true, nil)
+				gh.EXPECT().CreateRelease(tt.next, bumper.Repository(), bumper.IsCurrent(), &bump.ReleaseOption{}).Return(nil, nil, nil)
+				assert.NoError(t, bumper.Bump())
+			})
+		}
+	})
+
+	t.Run("bump semver with option", func(t *testing.T) {
+		tests := map[string]struct {
+			bumpType string
+			next     string
+			hasError bool
+		}{
+			"patch":   {bumpType: "patch", next: "v0.1.1", hasError: false},
+			"minor":   {bumpType: "minor", next: "v0.2.0", hasError: false},
+			"major":   {bumpType: "major", next: "v1.0.0", hasError: false},
+			"invalid": {bumpType: "invalid", next: "", hasError: true},
+		}
+
+		for name, tt := range tests {
+			t.Run(name, func(t *testing.T) {
+				bumper := bump.NewBumper(gh)
+				bumper.SetPrompter(prompter)
+				if tt.hasError {
+					assert.ErrorIsf(t, bumper.WithBumpType(tt.bumpType), bump.ErrInvalidBumpType, "got %s", tt.bumpType)
+					return
+				}
+
+				assert.NoError(t, bumper.WithBumpType(tt.bumpType))
+				gh.EXPECT().ListRelease(bumper.Repository(), bumper.IsCurrent()).Return(bytes.NewBufferString(tagList), nil, nil)
+				gh.EXPECT().ViewRelease(bumper.Repository(), bumper.IsCurrent()).Return(bytes.NewBufferString(releaseView), nil, nil)
+				prompter.EXPECT().Confirm(fmt.Sprintf("Create release %s ?", tt.next)).Return(true, nil)
+				gh.EXPECT().CreateRelease(tt.next, bumper.Repository(), bumper.IsCurrent(), &bump.ReleaseOption{}).Return(nil, nil, nil)
+				assert.NoError(t, bumper.Bump())
+			})
+		}
+	})
+
+	t.Run("cancel bump", func(t *testing.T) {
+		bumper := bump.NewBumper(gh)
+		bumper.SetPrompter(prompter)
+		gh.EXPECT().ListRelease(bumper.Repository(), bumper.IsCurrent()).Return(bytes.NewBufferString(tagList), nil, nil)
+		gh.EXPECT().ViewRelease(bumper.Repository(), bumper.IsCurrent()).Return(bytes.NewBufferString(releaseView), nil, nil)
+
+		prompter.EXPECT().Select("Select next version. current: v0.1.0", []string{"patch", "minor", "major"}).Return("patch", nil)
+		prompter.EXPECT().Confirm("Create release v0.1.1 ?").Return(false, nil)
+		assert.NoError(t, bumper.Bump())
+	})
+
+	t.Run("bump another repository", func(t *testing.T) {
+		bumper := bump.NewBumper(gh)
+		bumper.SetPrompter(prompter)
+
+		const repo = "johnmanjiro13/gh-bump"
+		assert.NoError(t, bumper.WithRepository("johnmanjiro13/gh-bump"))
+
+		gh.EXPECT().ListRelease(bumper.Repository(), bumper.IsCurrent()).Return(bytes.NewBufferString(tagList), nil, nil)
+		gh.EXPECT().ViewRelease(bumper.Repository(), bumper.IsCurrent()).Return(bytes.NewBufferString(releaseView), nil, nil)
+
+		prompter.EXPECT().Select("Select next version. current: v0.1.0", []string{"patch", "minor", "major"}).Return("patch", nil)
+		prompter.EXPECT().Confirm("Create release v0.1.1 ?").Return(true, nil)
+		gh.EXPECT().CreateRelease("v0.1.1", repo, false, &bump.ReleaseOption{}).Return(nil, nil, nil)
+		assert.NoError(t, bumper.Bump())
+	})
+
+	t.Run("bump with -y option", func(t *testing.T) {
+		bumper := bump.NewBumper(gh)
+		bumper.SetPrompter(prompter)
+
+		bumper.WithYes()
+		gh.EXPECT().ListRelease(bumper.Repository(), bumper.IsCurrent()).Return(bytes.NewBufferString(tagList), nil, nil)
+		gh.EXPECT().ViewRelease(bumper.Repository(), bumper.IsCurrent()).Return(bytes.NewBufferString(releaseView), nil, nil)
+
+		prompter.EXPECT().Select("Select next version. current: v0.1.0", []string{"patch", "minor", "major"}).Return("patch", nil)
+		gh.EXPECT().CreateRelease("v0.1.1", bumper.Repository(), bumper.IsCurrent(), &bump.ReleaseOption{}).Return(nil, nil, nil)
+		assert.NoError(t, bumper.Bump())
+	})
+}
 
 func TestBumper_WithRepository(t *testing.T) {
 	tests := map[string]struct {
@@ -234,66 +334,6 @@ func TestBumper_currentVersion(t *testing.T) {
 		want := semver.MustParse("v0.1.0")
 		assert.Equal(t, want, got)
 	})
-}
-
-type mockWriteCloser struct {
-	bytes.Buffer
-}
-
-func (m *mockWriteCloser) Close() error {
-	return nil
-}
-
-func TestNewVersion(t *testing.T) {
-	sin := io.NopCloser(strings.NewReader("v0.1.0\n"))
-	sout := &mockWriteCloser{bytes.Buffer{}}
-	newVer, err := bump.NewVersion(sin, sout)
-	assert.NoError(t, err)
-	assert.Equal(t, semver.MustParse("v0.1.0"), newVer)
-}
-
-func TestNextVersion(t *testing.T) {
-	sin := io.NopCloser(strings.NewReader(string(arrowDownAndEnter)))
-	sout := &mockWriteCloser{bytes.Buffer{}}
-	current := semver.MustParse("v0.1.0")
-	nextVer, err := bump.NextVersion(current, sin, sout)
-	fmt.Println(sout.String())
-	assert.NoError(t, err)
-	assert.Equal(t, semver.MustParse("v0.2.0"), nextVer)
-}
-
-func TestApprove(t *testing.T) {
-	tests := map[string]struct {
-		text string
-		want bool
-	}{
-		"approve with yes": {
-			text: "yes\n",
-			want: true,
-		},
-		"approve with y": {
-			text: "y\n",
-			want: true,
-		},
-		"disapprove with no": {
-			text: "no\n",
-			want: false,
-		},
-		"disapprove with n": {
-			text: "n\n",
-			want: false,
-		},
-	}
-
-	for name, tt := range tests {
-		t.Run(name, func(t *testing.T) {
-			sin := io.NopCloser(strings.NewReader(tt.text))
-			sout := &mockWriteCloser{bytes.Buffer{}}
-			got, err := bump.Approve(semver.MustParse("v0.1.0"), sin, sout)
-			assert.NoError(t, err)
-			assert.Equal(t, tt.want, got)
-		})
-	}
 }
 
 func TestIncrementVersion(t *testing.T) {
