@@ -16,10 +16,114 @@ import (
 const (
 	repoDocs = `name:   johnmanjiro13/gh-bump
 description:    gh extension for bumping version of a repository`
-	tagList     = `v0.2.1  Latest  v0.2.1  2021-12-08T04:19:16Z`
+	tagList     = `v0.1.0  Latest  v0.1.0  2021-12-08T04:19:16Z`
 	releaseView = `title:  v0.1.0
 tag:    v0.1.0`
 )
+
+func TestBumper_Bump(t *testing.T) {
+	ctrl := gomock.NewController(t)
+	defer ctrl.Finish()
+
+	gh := mock.NewMockGh(ctrl)
+	prompter := mock.NewMockPrompter(ctrl)
+
+	t.Run("bump semver", func(t *testing.T) {
+		tests := map[string]struct {
+			bumpType string
+			next     string
+		}{
+			"patch": {bumpType: "patch", next: "v0.1.1"},
+			"minor": {bumpType: "minor", next: "v0.2.0"},
+			"major": {bumpType: "major", next: "v1.0.0"},
+		}
+
+		for name, tt := range tests {
+			t.Run(name, func(t *testing.T) {
+				bumper := bump.NewBumper(gh)
+				bumper.SetPrompter(prompter)
+				gh.EXPECT().ListRelease(bumper.Repository(), bumper.IsCurrent()).Return(bytes.NewBufferString(tagList), nil, nil)
+				gh.EXPECT().ViewRelease(bumper.Repository(), bumper.IsCurrent()).Return(bytes.NewBufferString(releaseView), nil, nil)
+
+				prompter.EXPECT().Select("Select next version. current: v0.1.0", []string{"patch", "minor", "major"}).Return(tt.bumpType, nil)
+				prompter.EXPECT().Confirm(fmt.Sprintf("Create release %s ?", tt.next)).Return(true, nil)
+				gh.EXPECT().CreateRelease(tt.next, bumper.Repository(), bumper.IsCurrent(), &bump.ReleaseOption{}).Return(nil, nil, nil)
+				assert.NoError(t, bumper.Bump())
+			})
+		}
+	})
+
+	t.Run("bump semver with option", func(t *testing.T) {
+		tests := map[string]struct {
+			bumpType string
+			next     string
+			hasError bool
+		}{
+			"patch":   {bumpType: "patch", next: "v0.1.1", hasError: false},
+			"minor":   {bumpType: "minor", next: "v0.2.0", hasError: false},
+			"major":   {bumpType: "major", next: "v1.0.0", hasError: false},
+			"invalid": {bumpType: "invalid", next: "", hasError: true},
+		}
+
+		for name, tt := range tests {
+			t.Run(name, func(t *testing.T) {
+				bumper := bump.NewBumper(gh)
+				bumper.SetPrompter(prompter)
+				if tt.hasError {
+					assert.ErrorIsf(t, bumper.WithBumpType(tt.bumpType), bump.ErrInvalidBumpType, "got %s", tt.bumpType)
+					return
+				}
+
+				assert.NoError(t, bumper.WithBumpType(tt.bumpType))
+				gh.EXPECT().ListRelease(bumper.Repository(), bumper.IsCurrent()).Return(bytes.NewBufferString(tagList), nil, nil)
+				gh.EXPECT().ViewRelease(bumper.Repository(), bumper.IsCurrent()).Return(bytes.NewBufferString(releaseView), nil, nil)
+				prompter.EXPECT().Confirm(fmt.Sprintf("Create release %s ?", tt.next)).Return(true, nil)
+				gh.EXPECT().CreateRelease(tt.next, bumper.Repository(), bumper.IsCurrent(), &bump.ReleaseOption{}).Return(nil, nil, nil)
+				assert.NoError(t, bumper.Bump())
+			})
+		}
+	})
+
+	t.Run("cancel bump", func(t *testing.T) {
+		bumper := bump.NewBumper(gh)
+		bumper.SetPrompter(prompter)
+		gh.EXPECT().ListRelease(bumper.Repository(), bumper.IsCurrent()).Return(bytes.NewBufferString(tagList), nil, nil)
+		gh.EXPECT().ViewRelease(bumper.Repository(), bumper.IsCurrent()).Return(bytes.NewBufferString(releaseView), nil, nil)
+
+		prompter.EXPECT().Select("Select next version. current: v0.1.0", []string{"patch", "minor", "major"}).Return("patch", nil)
+		prompter.EXPECT().Confirm("Create release v0.1.1 ?").Return(false, nil)
+		assert.NoError(t, bumper.Bump())
+	})
+
+	t.Run("bump another repository", func(t *testing.T) {
+		bumper := bump.NewBumper(gh)
+		bumper.SetPrompter(prompter)
+
+		const repo = "johnmanjiro13/gh-bump"
+		assert.NoError(t, bumper.WithRepository("johnmanjiro13/gh-bump"))
+
+		gh.EXPECT().ListRelease(bumper.Repository(), bumper.IsCurrent()).Return(bytes.NewBufferString(tagList), nil, nil)
+		gh.EXPECT().ViewRelease(bumper.Repository(), bumper.IsCurrent()).Return(bytes.NewBufferString(releaseView), nil, nil)
+
+		prompter.EXPECT().Select("Select next version. current: v0.1.0", []string{"patch", "minor", "major"}).Return("patch", nil)
+		prompter.EXPECT().Confirm("Create release v0.1.1 ?").Return(true, nil)
+		gh.EXPECT().CreateRelease("v0.1.1", repo, false, &bump.ReleaseOption{}).Return(nil, nil, nil)
+		assert.NoError(t, bumper.Bump())
+	})
+
+	t.Run("bump with -y option", func(t *testing.T) {
+		bumper := bump.NewBumper(gh)
+		bumper.SetPrompter(prompter)
+
+		bumper.WithYes()
+		gh.EXPECT().ListRelease(bumper.Repository(), bumper.IsCurrent()).Return(bytes.NewBufferString(tagList), nil, nil)
+		gh.EXPECT().ViewRelease(bumper.Repository(), bumper.IsCurrent()).Return(bytes.NewBufferString(releaseView), nil, nil)
+
+		prompter.EXPECT().Select("Select next version. current: v0.1.0", []string{"patch", "minor", "major"}).Return("patch", nil)
+		gh.EXPECT().CreateRelease("v0.1.1", bumper.Repository(), bumper.IsCurrent(), &bump.ReleaseOption{}).Return(nil, nil, nil)
+		assert.NoError(t, bumper.Bump())
+	})
+}
 
 func TestBumper_WithRepository(t *testing.T) {
 	tests := map[string]struct {

@@ -17,6 +17,13 @@ type Gh interface {
 	CreateRelease(version string, repo string, isCurrent bool, option *ReleaseOption) (sout, eout *bytes.Buffer, err error)
 }
 
+//go:generate mockgen -source=$GOFILE -package=mock -destination=./mock/mock_${GOPACKAGE}.go
+type Prompter interface {
+	Input(question string, validator survey.Validator) (string, error)
+	Select(question string, options []string) (string, error)
+	Confirm(question string) (bool, error)
+}
+
 type ReleaseOption struct {
 	IsDraft            bool
 	IsPrerelease       bool
@@ -30,6 +37,7 @@ type ReleaseOption struct {
 
 type bumper struct {
 	gh                 Gh
+	prompter           Prompter
 	repository         string
 	isCurrent          bool
 	isDraft            bool
@@ -45,7 +53,10 @@ type bumper struct {
 }
 
 func NewBumper(gh Gh) *bumper {
-	return &bumper{gh: gh}
+	return &bumper{
+		gh:       gh,
+		prompter: newPrompter(),
+	}
 }
 
 func (b *bumper) WithRepository(repository string) error {
@@ -128,7 +139,7 @@ func (b *bumper) Bump() error {
 			return err
 		}
 	} else {
-		nextVer, err = nextVersion(current)
+		nextVer, err = b.nextVersion(current)
 		if err != nil {
 			return err
 		}
@@ -136,7 +147,7 @@ func (b *bumper) Bump() error {
 
 	// Skip approval if --yes is set
 	if !b.yes {
-		ok, err := approve(nextVer)
+		ok, err := b.approve(nextVer)
 		if err != nil {
 			return err
 		}
@@ -177,7 +188,7 @@ func (b *bumper) currentVersion() (current *semver.Version, isInitial bool, err 
 	sout, eout, err := b.gh.ViewRelease(b.repository, b.isCurrent)
 	if err != nil {
 		if strings.Contains(eout.String(), "release not found") {
-			current, err = newVersion()
+			current, err = b.newVersion()
 			if err != nil {
 				return nil, false, err
 			}
@@ -194,7 +205,7 @@ func (b *bumper) currentVersion() (current *semver.Version, isInitial bool, err 
 	return current, false, nil
 }
 
-func newVersion() (*semver.Version, error) {
+func (b *bumper) newVersion() (*semver.Version, error) {
 	validate := func(v interface{}) error {
 		input, ok := v.(string)
 		if !ok {
@@ -207,23 +218,18 @@ func newVersion() (*semver.Version, error) {
 		return nil
 	}
 
-	prompt := &survey.Input{
-		Message: "New version",
-	}
-	var version string
-	if err := survey.AskOne(prompt, &version, survey.WithValidator(validate)); err != nil {
+	version, err := b.prompter.Input("New version", validate)
+	if err != nil {
 		return nil, fmt.Errorf("failed to prompt. err: %w", err)
 	}
 	return semver.NewVersion(version)
 }
 
-func nextVersion(current *semver.Version) (*semver.Version, error) {
-	prompt := &survey.Select{
-		Message: fmt.Sprintf("Select next version. current: %s", current.Original()),
-		Options: []string{"patch", "minor", "major"},
-	}
-	var bumpType string
-	if err := survey.AskOne(prompt, &bumpType); err != nil {
+func (b *bumper) nextVersion(current *semver.Version) (*semver.Version, error) {
+	question := fmt.Sprintf("Select next version. current: %s", current.Original())
+	options := []string{"patch", "minor", "major"}
+	bumpType, err := b.prompter.Select(question, options)
+	if err != nil {
 		return nil, fmt.Errorf("failed to prompt. err: %w", err)
 	}
 	return incrementVersion(current, bumpType)
@@ -244,12 +250,10 @@ func incrementVersion(current *semver.Version, bumpType string) (*semver.Version
 	return &next, nil
 }
 
-func approve(next *semver.Version) (bool, error) {
-	var isApproved bool
-	prompt := &survey.Confirm{
-		Message: fmt.Sprintf("Create release %s ?", next.Original()),
-	}
-	if err := survey.AskOne(prompt, &isApproved); err != nil {
+func (b *bumper) approve(next *semver.Version) (bool, error) {
+	question := fmt.Sprintf("Create release %s ?", next.Original())
+	isApproved, err := b.prompter.Confirm(question)
+	if err != nil {
 		return false, fmt.Errorf("failed to prompt. err: %w", err)
 	}
 	return isApproved, nil

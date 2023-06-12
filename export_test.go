@@ -5,11 +5,12 @@ var (
 	ListReleases      = (*bumper).listReleases
 	CreateRelease     = (*bumper).createRelease
 	CurrentVersion    = (*bumper).currentVersion
-	NewVersion        = newVersion
-	NextVersion       = nextVersion
 	IncrementVersion  = incrementVersion
-	Approve           = approve
 )
+
+func (b *bumper) SetPrompter(prompter Prompter) {
+	b.prompter = prompter
+}
 
 func (b *bumper) Repository() string {
 	return b.repository
