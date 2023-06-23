@@ -1,5 +1,8 @@
 # Changelog
 
+## [v0.8.1](https://github.com/johnmanjiro13/gh-bump/compare/v0.8.0...v0.8.1) - 2023-06-16
+- fix(deps): update module github.com/alecaivazis/survey/v2 to v2.3.7 by @renovate in https://github.com/johnmanjiro13/gh-bump/pull/98
+
 ## [v0.8.0](https://github.com/johnmanjiro13/gh-bump/compare/v0.7.3...v0.8.0) - 2023-06-12
 - feat: Bump go version to 1.20 by @johnmanjiro13 in https://github.com/johnmanjiro13/gh-bump/pull/90
 - fix: Use new error message by @johnmanjiro13 in https://github.com/johnmanjiro13/gh-bump/pull/93
