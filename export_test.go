@@ -52,6 +52,10 @@ func (b *bumper) Title() string {
 	return b.title
 }
 
+func (b *bumper) AssetFiles() []string {
+	return b.assetFiles
+}
+
 func (b *bumper) BumpType() BumpType {
 	return b.bumpType
 }
