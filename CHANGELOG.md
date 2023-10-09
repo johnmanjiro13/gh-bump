@@ -1,5 +1,8 @@
 # Changelog
 
+## [v0.9.0](https://github.com/johnmanjiro13/gh-bump/compare/v0.8.2...v0.9.0) - 2023-10-09
+- Support to upload asset files by @johnmanjiro13 in https://github.com/johnmanjiro13/gh-bump/pull/105
+
 ## [v0.8.2](https://github.com/johnmanjiro13/gh-bump/compare/v0.8.1...v0.8.2) - 2023-10-09
 - chore(deps): update actions/checkout action to v4 by @renovate in https://github.com/johnmanjiro13/gh-bump/pull/100
 - chore(deps): update goreleaser/goreleaser-action action to v5 by @renovate in https://github.com/johnmanjiro13/gh-bump/pull/101
