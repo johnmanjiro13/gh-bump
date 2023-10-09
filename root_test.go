@@ -19,6 +19,7 @@ type mockBumper struct {
 	notesFilename      string
 	target             string
 	title              string
+	assetFiles         []string
 	bumpType           bump.BumpType
 	yes                bool
 }
@@ -64,6 +65,10 @@ func (b *mockBumper) WithTarget(target string) {
 	b.target = target
 }
 
+func (b *mockBumper) WithAssetFiles(files []string) {
+	b.assetFiles = files
+}
+
 func (b *mockBumper) WithBumpType(s string) error {
 	bumpType, err := bump.ParseBumpType(s)
 	if err != nil {
@@ -89,6 +94,7 @@ func TestNew(t *testing.T) {
 		wantNotesFilename      string
 		wantTarget             string
 		wantTitle              string
+		wantAssetFiles         []string
 		wantBumpType           bump.BumpType
 		wantYes                bool
 	}{
@@ -132,6 +138,14 @@ func TestNew(t *testing.T) {
 			command:   "bump -t test_title",
 			wantTitle: "test_title",
 		},
+		"with asset files with comma": {
+			command:        "bump --asset-files file1,file2",
+			wantAssetFiles: []string{"file1", "file2"},
+		},
+		"with asset files with multiple flags": {
+			command:        "bump --asset-files file1 --asset-files file2",
+			wantAssetFiles: []string{"file1", "file2"},
+		},
 		"with bump type": {
 			command:      "bump --bump-type major",
 			wantBumpType: bump.Major,
@@ -158,6 +172,7 @@ func TestNew(t *testing.T) {
 			assert.Equal(t, tt.wantNotesFilename, bumper.notesFilename)
 			assert.Equal(t, tt.wantTarget, bumper.target)
 			assert.Equal(t, tt.wantTitle, bumper.title)
+			assert.Equal(t, tt.wantAssetFiles, bumper.assetFiles)
 			assert.Equal(t, tt.wantBumpType, bumper.bumpType)
 			assert.Equal(t, tt.wantYes, bumper.yes)
 		})

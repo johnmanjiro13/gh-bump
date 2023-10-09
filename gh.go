@@ -38,6 +38,9 @@ func (g *ghCLI) ViewRelease(repo string, isCurrent bool) (sout, eout *bytes.Buff
 
 func (g *ghCLI) CreateRelease(version string, repo string, isCurrent bool, option *ReleaseOption) (sout, eout *bytes.Buffer, err error) {
 	args := []string{"release", "create", version}
+	if len(option.AssetFiles) > 0 {
+		args = append(args, option.AssetFiles...)
+	}
 	if !isCurrent {
 		args = append(args, []string{"-R", repo}...)
 	}

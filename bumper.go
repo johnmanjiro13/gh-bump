@@ -33,6 +33,7 @@ type ReleaseOption struct {
 	NotesFilename      string
 	Target             string
 	Title              string
+	AssetFiles         []string
 }
 
 type bumper struct {
@@ -48,6 +49,7 @@ type bumper struct {
 	notesFilename      string
 	target             string
 	title              string
+	assetFiles         []string
 	bumpType           BumpType
 	yes                bool
 }
@@ -104,6 +106,10 @@ func (b *bumper) WithTarget(target string) {
 
 func (b *bumper) WithTitle(title string) {
 	b.title = title
+}
+
+func (b *bumper) WithAssetFiles(files []string) {
+	b.assetFiles = files
 }
 
 func (b *bumper) WithBumpType(s string) error {
@@ -269,6 +275,7 @@ func (b *bumper) createRelease(version string) (string, error) {
 		NotesFilename:      b.notesFilename,
 		Target:             b.target,
 		Title:              b.title,
+		AssetFiles:         b.assetFiles,
 	}
 	sout, _, err := b.gh.CreateRelease(version, b.repository, b.isCurrent, option)
 	if err != nil {

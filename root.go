@@ -13,6 +13,7 @@ type Bumper interface {
 	WithNotesFile(filename string)
 	WithTitle(title string)
 	WithTarget(target string)
+	WithAssetFiles(files []string)
 	WithBumpType(bumpType string) error
 	WithYes()
 }
@@ -28,6 +29,7 @@ func NewRootCmd(bumper Bumper) *cobra.Command {
 		notesFile          string
 		target             string
 		title              string
+		assetFiles         []string
 		bumpType           string
 		yes                bool
 	)
@@ -62,6 +64,9 @@ func NewRootCmd(bumper Bumper) *cobra.Command {
 			if title != "" {
 				bumper.WithTitle(title)
 			}
+			if len(assetFiles) > 0 {
+				bumper.WithAssetFiles(assetFiles)
+			}
 			if bumpType != "" {
 				err := bumper.WithBumpType(bumpType)
 				if err != nil {
@@ -84,6 +89,7 @@ func NewRootCmd(bumper Bumper) *cobra.Command {
 	cmd.Flags().StringVarP(&notesFile, "notes-file", "F", "", "Read release notes from file")
 	cmd.Flags().StringVar(&target, "target", "", "Target branch or full commit SHA (default: main branch)")
 	cmd.Flags().StringVarP(&title, "title", "t", "", "Release title")
+	cmd.Flags().StringSliceVar(&assetFiles, "asset-files", []string{}, "Asset files to upload")
 	cmd.Flags().StringVar(&bumpType, "bump-type", "", "Bump type (major, minor or patch)")
 	cmd.Flags().BoolVarP(&yes, "yes", "y", false, "Answer 'yes' to all questions")
 	return cmd
