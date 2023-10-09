@@ -78,13 +78,13 @@ func NewRootCmd(bumper Bumper) *cobra.Command {
 	cmd.Flags().StringVarP(&repository, "repo", "R", "", "Select another repository using the [HOST/]OWNER/REPO format")
 	cmd.Flags().BoolVarP(&isDraft, "draft", "d", false, "Save the release as a draft instead of publishing it")
 	cmd.Flags().BoolVarP(&isPrerelease, "prerelease", "p", false, "Mark the release as a prerelease")
-	cmd.Flags().StringVarP(&discussionCategory, "discussion-category", "", "", "Start a discussion of the specified category")
+	cmd.Flags().StringVar(&discussionCategory, "discussion-category", "", "Start a discussion of the specified category")
 	cmd.Flags().BoolVarP(&generateNotes, "generate-notes", "g", false, "Automatically generate title and notes for the release")
 	cmd.Flags().StringVarP(&notes, "notes", "n", "", "Release notes")
 	cmd.Flags().StringVarP(&notesFile, "notes-file", "F", "", "Read release notes from file")
-	cmd.Flags().StringVarP(&target, "target", "", "", "Target branch or full commit SHA (default: main branch)")
+	cmd.Flags().StringVar(&target, "target", "", "Target branch or full commit SHA (default: main branch)")
 	cmd.Flags().StringVarP(&title, "title", "t", "", "Release title")
-	cmd.Flags().StringVarP(&bumpType, "bump-type", "", "", "Bump type (major, minor or patch)")
+	cmd.Flags().StringVar(&bumpType, "bump-type", "", "Bump type (major, minor or patch)")
 	cmd.Flags().BoolVarP(&yes, "yes", "y", false, "Answer 'yes' to all questions")
 	return cmd
 }
