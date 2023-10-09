@@ -248,6 +248,17 @@ func TestBumper_WithTitle(t *testing.T) {
 	assert.Equal(t, "title", b.Title())
 }
 
+func TestBumper_WithAssetFiles(t *testing.T) {
+	ctrl := gomock.NewController(t)
+	defer ctrl.Finish()
+
+	gh := mock.NewMockGh(ctrl)
+	b := bump.NewBumper(gh)
+	b.WithAssetFiles([]string{"file1", "file2"})
+
+	assert.Equal(t, []string{"file1", "file2"}, b.AssetFiles())
+}
+
 func TestBumper_WithBumpType(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
