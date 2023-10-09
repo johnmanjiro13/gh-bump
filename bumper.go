@@ -132,6 +132,12 @@ func (b *bumper) Bump() error {
 	}
 	fmt.Println(releases)
 
+	if len(b.assetFiles) > 0 {
+		fmt.Println("Asset files:")
+		fmt.Println(strings.Join(b.assetFiles, "\n"))
+		fmt.Println()
+	}
+
 	current, isInitial, err := b.currentVersion()
 	if err != nil {
 		return err
