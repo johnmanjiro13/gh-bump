@@ -1,5 +1,11 @@
 # Changelog
 
+## [v0.9.1](https://github.com/johnmanjiro13/gh-bump/compare/v0.9.0...v0.9.1) - 2024-02-24
+- fix(deps): update module github.com/spf13/cobra to v1.8.0 by @renovate in https://github.com/johnmanjiro13/gh-bump/pull/107
+- chore(deps): update codecov/codecov-action action to v4 by @renovate in https://github.com/johnmanjiro13/gh-bump/pull/111
+- chore(deps): update actions/cache action to v4 by @renovate in https://github.com/johnmanjiro13/gh-bump/pull/110
+- chore(deps): update actions/setup-go action to v5 by @renovate in https://github.com/johnmanjiro13/gh-bump/pull/109
+
 ## [v0.9.0](https://github.com/johnmanjiro13/gh-bump/compare/v0.8.2...v0.9.0) - 2023-10-09
 - Support to upload asset files by @johnmanjiro13 in https://github.com/johnmanjiro13/gh-bump/pull/105
 
