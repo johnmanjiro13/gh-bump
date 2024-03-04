@@ -1,5 +1,8 @@
 # Changelog
 
+## [v0.9.2](https://github.com/johnmanjiro13/gh-bump/compare/v0.9.1...v0.9.2) - 2024-03-02
+- fix(deps): update module github.com/stretchr/testify to v1.9.0 by @renovate in https://github.com/johnmanjiro13/gh-bump/pull/112
+
 ## [v0.9.1](https://github.com/johnmanjiro13/gh-bump/compare/v0.9.0...v0.9.1) - 2024-02-24
 - fix(deps): update module github.com/spf13/cobra to v1.8.0 by @renovate in https://github.com/johnmanjiro13/gh-bump/pull/107
 - chore(deps): update codecov/codecov-action action to v4 by @renovate in https://github.com/johnmanjiro13/gh-bump/pull/111
