@@ -1,5 +1,12 @@
 # Changelog
 
+## [v0.9.3](https://github.com/johnmanjiro13/gh-bump/compare/v0.9.2...v0.9.3) - 2025-02-15
+- fix(deps): update module github.com/spf13/cobra to v1.8.1 by @renovate in https://github.com/johnmanjiro13/gh-bump/pull/115
+- fix(deps): update module github.com/masterminds/semver/v3 to v3.3.0 by @renovate in https://github.com/johnmanjiro13/gh-bump/pull/117
+- fix(deps): update module github.com/masterminds/semver/v3 to v3.3.1 by @renovate in https://github.com/johnmanjiro13/gh-bump/pull/120
+- fix(deps): update module github.com/stretchr/testify to v1.10.0 by @renovate in https://github.com/johnmanjiro13/gh-bump/pull/121
+- fix(deps): update module github.com/spf13/cobra to v1.9.0 by @renovate in https://github.com/johnmanjiro13/gh-bump/pull/123
+
 ## [v0.9.2](https://github.com/johnmanjiro13/gh-bump/compare/v0.9.1...v0.9.2) - 2024-03-02
 - fix(deps): update module github.com/stretchr/testify to v1.9.0 by @renovate in https://github.com/johnmanjiro13/gh-bump/pull/112
 
