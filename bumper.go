@@ -51,6 +51,7 @@ type bumper struct {
 	title              string
 	assetFiles         []string
 	bumpType           BumpType
+	suffix             string
 	yes                bool
 }
 
@@ -121,6 +122,10 @@ func (b *bumper) WithBumpType(s string) error {
 	return nil
 }
 
+func (b *bumper) WithSuffix(suffix string) {
+	b.suffix = suffix
+}
+
 func (b *bumper) WithYes() {
 	b.yes = true
 }
@@ -156,10 +161,14 @@ func (b *bumper) Bump() error {
 			return err
 		}
 	}
+	nextVerString := nextVer.Original()
+	if b.suffix != "" {
+		nextVerString = fmt.Sprintf("%s-%s", nextVerString, b.suffix)
+	}
 
 	// Skip approval if --yes is set
 	if !b.yes {
-		ok, err := b.approve(nextVer)
+		ok, err := b.approve(nextVerString)
 		if err != nil {
 			return err
 		}
@@ -169,7 +178,7 @@ func (b *bumper) Bump() error {
 		}
 	}
 
-	result, err := b.createRelease(nextVer.Original())
+	result, err := b.createRelease(nextVerString)
 	if err != nil {
 		return err
 	}
@@ -262,8 +271,8 @@ func incrementVersion(current *semver.Version, bumpType string) (*semver.Version
 	return &next, nil
 }
 
-func (b *bumper) approve(next *semver.Version) (bool, error) {
-	question := fmt.Sprintf("Create release %s ?", next.Original())
+func (b *bumper) approve(next string) (bool, error) {
+	question := fmt.Sprintf("Create release %s ?", next)
 	isApproved, err := b.prompter.Confirm(question)
 	if err != nil {
 		return false, fmt.Errorf("failed to prompt. err: %w", err)
