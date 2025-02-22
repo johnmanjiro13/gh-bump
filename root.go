@@ -15,6 +15,7 @@ type Bumper interface {
 	WithTarget(target string)
 	WithAssetFiles(files []string)
 	WithBumpType(bumpType string) error
+	WithSuffix(suffix string)
 	WithYes()
 }
 
@@ -31,6 +32,7 @@ func NewRootCmd(bumper Bumper) *cobra.Command {
 		title              string
 		assetFiles         []string
 		bumpType           string
+		suffix             string
 		yes                bool
 	)
 	cmd := &cobra.Command{
@@ -73,6 +75,9 @@ func NewRootCmd(bumper Bumper) *cobra.Command {
 					return err
 				}
 			}
+			if suffix != "" {
+				bumper.WithSuffix(suffix)
+			}
 			if yes {
 				bumper.WithYes()
 			}
@@ -91,6 +96,7 @@ func NewRootCmd(bumper Bumper) *cobra.Command {
 	cmd.Flags().StringVarP(&title, "title", "t", "", "Release title")
 	cmd.Flags().StringSliceVar(&assetFiles, "asset-files", []string{}, "Asset files to upload")
 	cmd.Flags().StringVar(&bumpType, "bump-type", "", "Bump type (major, minor or patch)")
+	cmd.Flags().StringVar(&suffix, "suffix", "", "Suffix for the version")
 	cmd.Flags().BoolVarP(&yes, "yes", "y", false, "Answer 'yes' to all questions")
 	return cmd
 }

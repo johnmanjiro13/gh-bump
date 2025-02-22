@@ -21,6 +21,7 @@ type mockBumper struct {
 	title              string
 	assetFiles         []string
 	bumpType           bump.BumpType
+	suffix             string
 	yes                bool
 }
 
@@ -78,6 +79,10 @@ func (b *mockBumper) WithBumpType(s string) error {
 	return nil
 }
 
+func (b *mockBumper) WithSuffix(suffix string) {
+	b.suffix = suffix
+}
+
 func (b *mockBumper) WithYes() {
 	b.yes = true
 }
@@ -96,6 +101,7 @@ func TestNew(t *testing.T) {
 		wantTitle              string
 		wantAssetFiles         []string
 		wantBumpType           bump.BumpType
+		wantSuffix             string
 		wantYes                bool
 	}{
 		"repository given": {
@@ -150,6 +156,10 @@ func TestNew(t *testing.T) {
 			command:      "bump --bump-type major",
 			wantBumpType: bump.Major,
 		},
+		"with suffix": {
+			command:    "bump --suffix test",
+			wantSuffix: "test",
+		},
 		"with yes": {
 			command: "bump --yes",
 			wantYes: true,
@@ -174,6 +184,7 @@ func TestNew(t *testing.T) {
 			assert.Equal(t, tt.wantTitle, bumper.title)
 			assert.Equal(t, tt.wantAssetFiles, bumper.assetFiles)
 			assert.Equal(t, tt.wantBumpType, bumper.bumpType)
+			assert.Equal(t, tt.wantSuffix, bumper.suffix)
 			assert.Equal(t, tt.wantYes, bumper.yes)
 		})
 	}
