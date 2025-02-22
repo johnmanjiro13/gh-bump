@@ -27,6 +27,6 @@ jobs:
         with:
           go-version-file: 'go.mod'
       - name: release by goreleaser
-        uses: goreleaser/goreleaser-action@v5
+        uses: goreleaser/goreleaser-action@v6
         with:
           args: release --rm-dist
