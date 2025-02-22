@@ -1,6 +1,8 @@
 module github.com/johnmanjiro13/gh-bump
 
-go 1.20
+go 1.21
+
+toolchain go1.23.2
 
 require (
 	github.com/AlecAivazis/survey/v2 v2.3.7
